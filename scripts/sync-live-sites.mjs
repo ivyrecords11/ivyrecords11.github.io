@@ -25,7 +25,8 @@ for (const repo of repos.filter(item => !item.private && !item.archived && !item
   if (!response.ok) throw new Error(`GitHub Pages API ${response.status} for ${repo.full_name}`);
   const pages = await response.json();
   if (pages.status !== 'built' || !pages.html_url) continue;
-  published.push({ name: repo.name, description: repo.description || 'GitHub Pages에 공개된 프로젝트 사이트입니다.', url: pages.html_url });
+  const title = repo.name.split(/[-_]+/).map(part => ({ '2d': '2D', mnist: 'MNIST', mlp: 'MLP', utau: 'UTAU', ustx: 'USTX' })[part.toLowerCase()] || part[0].toUpperCase() + part.slice(1)).join(' ');
+  published.push({ name: title, description: repo.description || 'GitHub Pages에 공개된 프로젝트 사이트입니다.', url: pages.html_url });
 }
 
 published.sort((a, b) => a.name.localeCompare(b.name));
