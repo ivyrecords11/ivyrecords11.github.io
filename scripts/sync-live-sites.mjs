@@ -37,7 +37,10 @@ const items = published.map((site, index) =>
 const newList = `<ul class="site-list">\n${items}\n</ul>`;
 const indexPath = 'index.html';
 const html = await (await import('node:fs/promises')).readFile(indexPath, 'utf8');
-const oldList = html.match(/<ul class="site-list">[\\s\\S]*?<\\/ul>/)?.[0];
+const start = html.indexOf('<ul class="site-list">');
+const end = start < 0 ? -1 : html.indexOf('</ul>', start);
+if (start < 0 || end < 0) throw new Error('Could not find .site-list in index.html.');
+const oldList = html.slice(start, end + '</ul>'.length);
 if (!oldList) throw new Error('Could not find .site-list in index.html.');
 if (oldList === newList) {
   console.log(`Published site list already current (${published.length} sites).`);
