@@ -19,7 +19,7 @@ function escapeHtml(value) {
 
 const repos = await getJson(`https://api.github.com/users/${owner}/repos?per_page=100&sort=pushed`);
 const published = [];
-for (const repo of repos.filter(item => !item.private && !item.archived && !item.fork)) {
+for (const repo of repos.filter(item => !item.private && !item.archived && !item.fork && item.name !== `${owner}.github.io`)) {
   const response = await fetch(`https://api.github.com/repos/${owner}/${encodeURIComponent(repo.name)}/pages`, { headers: apiHeaders });
   if (response.status === 404) continue;
   if (!response.ok) throw new Error(`GitHub Pages API ${response.status} for ${repo.full_name}`);
