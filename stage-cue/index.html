@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="ko"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stage Cue — 밴드 무대 플래너</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&amp;display=swap">
+<style>
+@font-face{
+ font-family:"BusanDandiHandwriting";
+ src:url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2610132210@font-342/font-342/%EB%B6%80%EC%82%B0%EB%8B%A8%EB%94%94%EC%86%90%EA%B8%80%EC%94%A8.woff2") format("woff2");
+ font-weight:400;
+ font-display:swap;
+ unicode-range:U+1100-11FF,U+3130-318F,U+A960-A97F,U+AC00-D7FF,U+FFA0-FFDC;
+}
+:root{
+ color-scheme:light;
+ --paper:#f8ebaf;--panel:#fff3c8;--ink:#292d30;--muted:#555142;
+ --rule:#c9bc86;--pencil:#786c4e;--signal:#18488b;--wash:#dbe8f9;
+ --margin:#b66c65;--wire:#285b9e;
+ --hand:"Ink Free","Segoe Print","Nanum Pen Script","BusanDandiHandwriting","Gungsuh","궁서",cursive;
+ --ruled:repeating-linear-gradient(transparent 0 23px,#617b9b3b 23px 24px);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--ruled),var(--paper);color:var(--ink);font:15px/1.4 var(--hand)}
+button,input,select{font:inherit;color:inherit}
+button,select{cursor:pointer;border:1px solid var(--pencil);border-radius:2px 5px 3px 4px;background:var(--panel);padding:6px 10px;min-height:34px}
+button:hover,select:hover{border-color:var(--signal);background:var(--wash)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+button:disabled{opacity:.4;cursor:default}
+small,.muted{color:var(--muted)}
+h1,h2,p{margin:0}
+header{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;padding:19px clamp(12px,3vw,42px);background:var(--ruled),var(--panel);border-bottom:1px solid var(--pencil)}
+.header-title{display:flex;align-items:center;flex-wrap:wrap;gap:10px 18px}
+.brand{display:flex;align-items:center;gap:14px}
+.project-title{display:grid;gap:2px;max-width:100%;font-size:11px;color:var(--muted)}
+.project-title input{width:min(230px,78vw);padding:5px 8px;border:1px solid var(--pencil);border-radius:2px 5px 3px 4px;background:var(--panel);color:var(--ink);font-size:15px}
+.logo{display:grid;place-items:center;width:41px;height:40px;color:var(--signal);font:700 18px var(--hand);border:1px solid currentColor;border-radius:3px 8px 4px 7px;box-shadow:2px 2px 0 #245ba358;transform:rotate(-8deg)}
+.brand strong{
+ display:block;font:700 clamp(24px,3.2vw,42px)/1.05 var(--hand);letter-spacing:.07em;
+ color:var(--ink);text-shadow:1px 1px #786c4e4d;transform:rotate(-2deg);
+}
+.brand:after{
+ content:'';width:49px;height:23px;flex:none;transform:rotate(-9deg);
+ background:no-repeat center / contain url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 55 26'%3E%3Cpath d='M2 19L49 17 52 5 8 6Z M2 19v4l47-2 3-4V5 M9 19L15 6 M16 18L21 6 M23 18L27 6 M30 18L33 5 M37 17L39 5 M44 17L45 5' fill='none' stroke='%2318488b' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cpath d='m16 6-4 9m10-9-4 9m15-10-3 9m9-9-3 9' stroke='%2318488b' stroke-width='2.2'/%3E%3C/svg%3E");
+}
+.brand small{display:block;margin-top:3px;font-size:11px}
+.tools,.sheetfoot{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#save{font-size:11px;margin-right:6px}
+#exportProject,.accent{background:var(--wash);border-color:var(--signal);color:var(--signal);font-weight:700}
+#exportProject:hover,.accent:hover{background:#cbdff7}
+.shell{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(340px,1fr);gap:14px;margin:auto;max-width:1800px;padding:14px clamp(10px,2vw,28px)}
+.shell.wide{grid-template-columns:minmax(0,1fr)}
+.panel{background:var(--panel);border:1px solid var(--pencil);border-radius:3px 6px 4px 5px;box-shadow:2px 2px 0 #39313d1c;min-width:0;overflow:hidden}
+.head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;padding:12px 14px}
+.eyebrow{font:700 12px var(--hand);letter-spacing:.12em;color:var(--signal)}
+h1{font-size:clamp(19px,2.1vw,29px);line-height:1.2;margin:3px 0;overflow-wrap:anywhere}
+h2{font-size:16px;margin-top:3px}
+.stage{
+ height:clamp(390px,57vh,680px);position:relative;margin:0 12px;
+ border:1px solid var(--pencil);border-radius:5px 3px 7px 4px;overflow:hidden;
+ background:linear-gradient(90deg,transparent 0 6%,var(--margin) 6% calc(6% + 1px),transparent calc(6% + 1px)),var(--ruled),var(--paper);
+}
+.stage:before,.stage:after{position:absolute;left:50%;transform:translateX(-50%) rotate(-2deg);font:700 11px var(--hand);letter-spacing:.16em;color:var(--signal);pointer-events:none}
+.stage:before{content:'UPSTAGE';top:10px}
+.stage:after{content:'↓  AUDIENCE';bottom:9px;padding-top:5px;border-top:1px solid var(--signal)}
+.station{position:absolute;transform:translate(-50%,-50%);touch-action:none;cursor:grab;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;text-align:center;width:82px;min-height:96px;background:transparent;color:var(--ink);border:0;padding:3px;text-shadow:0 0 4px var(--paper),0 0 3px var(--paper)}
+.station:hover{background:transparent;color:var(--signal)}.station:focus-visible{outline:2px dashed var(--role);outline-offset:1px}
+.station.instrument{min-height:0}
+.name-slip{
+ background:#fffef9;color:var(--person,var(--ink));font-weight:700;line-height:1.15;
+ min-height:26px;padding:6px 11px;max-width:112px;overflow-wrap:anywhere;
+ border:2px solid transparent;
+ border-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='48' viewBox='0 0 80 48'%3E%3Cpath d='M3 4 Q12 2 20 4 T38 3 Q48 5 57 3 T77 5 Q75 13 77 21 T76 33 Q78 39 75 44 Q63 42 53 44 T34 43 Q25 45 16 43 T3 44 Q5 35 3 27 T4 15 Q2 9 3 4Z' fill='%23fffef9' stroke='%2382765c' stroke-width='1.4'/%3E%3C/svg%3E") 8 / 2px round;
+ filter:drop-shadow(1px 2px 1px #6f624b26);
+}
+.stage-name{position:absolute;z-index:2;transform:translate(-50%,-50%);touch-action:none;cursor:grab}
+.stage-name:hover{background:#fff}
+.waiting-names{position:absolute;z-index:3;top:24px;bottom:24px;left:calc(6% + 4px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;pointer-events:none}
+.waiting-names .name-slip{opacity:1}
+.station:active{cursor:grabbing;z-index:5}
+.station.inactive{opacity:.62}
+.station svg{color:var(--person,var(--role));fill:none;stroke:currentColor;stroke-width:1.35;stroke-linecap:round;stroke-linejoin:round;transform:rotate(-5deg)}
+.station.instrument.unassigned{--role:#76600f}
+.station.instrument.assigned{--role:var(--person)}
+.station.amp{--role:#c76124}
+.station.link-selected{outline:2px dashed #c76124;outline-offset:3px}
+.station.amp .amp-title{color:#a64a18}
+.station.amp .bt{color:#315f9d}
+.station>svg{width:58px;height:58px;flex:none}
+.station svg .pencil-mark{stroke-width:.72;opacity:.55}
+.station b,.station small{display:block;overflow-wrap:anywhere}
+.station b{font-size:14px;line-height:1.15;color:var(--person,var(--ink))}
+.station small{font-size:11px;color:var(--muted);margin-top:0;line-height:1.1}
+.station .amp-title{color:var(--signal)}
+.station .bt{display:inline-block;width:13px;height:13px;color:var(--signal);vertical-align:middle;margin-left:3px;transform:none;filter:none}
+.wires{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.note{padding:8px 13px;color:var(--muted);font-size:12px;min-height:34px}
+.transport{border-top:1px solid var(--rule);padding:10px 12px}
+.transport .tools{margin-bottom:8px}
+.rail{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(31px,1fr);gap:2px;overflow:auto;padding-bottom:3px}
+.rail button{padding:4px 2px;font:700 13px var(--hand);min-height:28px}
+.rail .act2{border-top:2px solid var(--signal)}
+.rail .current{background:var(--wash);border-color:var(--signal);color:var(--signal);font-weight:800}
+.sidetabs{display:flex;background:#f4e4ab;border-bottom:1px solid var(--rule)}
+.sidetabs button{border:0;border-right:1px solid var(--rule);border-radius:0;background:transparent;padding:8px 16px}
+.sidetabs button[aria-pressed=true]{background:var(--panel);box-shadow:inset 0 -2px var(--signal);color:var(--signal);font-weight:700}
+.sheet{overflow:auto;max-height:60vh;border-block:1px solid var(--rule)}
+.sheet table{border-collapse:separate;border-spacing:0;min-width:100%;font-size:12px}
+td,th{border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:0;background:var(--panel);white-space:nowrap}
+tbody tr:nth-child(even) td{background:#faedbb}
+th{position:sticky;top:0;z-index:2;padding:8px;background:#eddda2;text-align:left}
+th:first-child,td:first-child{position:sticky;left:0;z-index:1}
+th:first-child{z-index:3}
+td:first-child button{border:0;border-radius:0;background:#efdfa6;width:34px;padding:5px;min-height:30px}
+tbody tr.selected td{background:var(--wash)}
+.selected td:first-child button{background:var(--signal);color:white}
+td input{width:96px;background:transparent;border:0;padding:6px}
+td input.performer{color:var(--person);font-weight:650}
+td input::placeholder{color:#74746a}
+td:nth-child(2) input{width:145px}
+td:nth-last-child(2) input{width:180px}
+td:last-child input{width:48px}
+.sheetfoot{padding:10px 13px}
+.sheethelp{padding:0 13px 12px;font-size:12px}
+.amp-list{display:grid;max-height:65vh;overflow:auto;border-top:1px solid var(--rule)}
+.amp-list>p{padding:12px}
+.amp-editor{border-bottom:1px solid var(--rule);padding:11px 13px;display:grid;gap:8px}
+.amp-fields{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.amp-fields label,.amp-ports label{display:flex;align-items:center;gap:5px;font-size:12px}
+.amp-fields input:not([type=checkbox]){background:var(--panel);border:1px solid var(--rule);padding:5px;width:112px}
+.amp-fields input[type=number]{width:52px}
+.amp-ports{display:grid;grid-template-columns:repeat(auto-fit,minmax(136px,1fr));gap:6px}
+.amp-ports select{min-width:0;flex:1;padding:4px}
+.hide,[hidden]{display:none!important}
+@media(max-width:850px){.shell{grid-template-columns:1fr}.stage{height:420px}.sheet{max-height:440px}}
+@media(max-width:420px){.stage{margin:0 5px}.station{width:64px;min-height:78px;gap:2px;padding:2px}.station>svg{width:46px;height:46px}.station b{font-size:12px}.station small{font-size:10px}}
+/* Ink outlines for the layout. Notebook rules are drawn by the paper background. */
+:root{
+ --sketch-frame:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M2 2 C14 1 21 3 31 2 S48 1 57 2 S66 2.6 70 2 C69 15 71 23 70 33 S69 48 70 58 S70.7 66 70 70 C60 69 52 71 43 70 S27 69 17 70 S6 70.7 2 70 C3 60 1 53 2 44 S3 28 2 18 S1.3 7 2 2Z' fill='none' stroke='%23786c4e' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
+ --sketch-cell:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M2 2 C14 1 21 3 31 2 S48 1 57 2 S66 2.6 70 2 C69 15 71 23 70 33 S69 48 70 58 S70.7 66 70 70 C60 69 52 71 43 70 S27 69 17 70 S6 70.7 2 70 C3 60 1 53 2 44 S3 28 2 18 S1.3 7 2 2Z' fill='none' stroke='%23b4a472' stroke-width='1.5' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+.panel,.stage{
+ border-width:2px;
+ border-image:var(--sketch-frame) 4 / 3px round;
+}
+.tools button,.tools select,.sheetfoot button,.head>button,.rail button{
+ border-image:var(--sketch-frame) 4 / 2px round;
+}
+.rail .current,.rail .act2,.tools button:hover,.tools select:hover,
+.sheetfoot button:hover,.head>button:hover,.rail button:hover{border-image:none}
+td,th{
+ border-image:var(--sketch-cell) 4 / 0 2px 2px 0 round;
+}
+.amp-editor{
+ border-image:var(--sketch-cell) 4 / 0 0 2px 0 round;
+}
+.font-credit{max-width:1800px;margin:auto;padding:0 clamp(10px,2vw,28px) 12px;text-align:right;font-size:11px;color:var(--muted)}
+.font-credit a{color:inherit}
+.team-dialog{width:min(440px,calc(100% - 32px));padding:22px;background:var(--paper,#fff4ca);color:inherit;border:1px solid currentColor;border-radius:10px}
+.team-dialog::backdrop{background:#19244080}
+.team-dialog h2{margin:0 0 8px}
+.team-dialog label{display:grid;gap:5px;margin:12px 0}
+.team-dialog input{padding:6px 8px;font:inherit}
+.team-dialog .tools{flex-wrap:wrap}
+.team-dialog [role=status]{min-height:1.5em}
+</style>
+<header><div class="header-title"><div class="brand"><span class="logo" aria-hidden="true">SC</span><div><strong>STAGE CUE</strong><small>무대 도면 · 큐 시트</small></div></div><label class="project-title">프로젝트 제목<input id="projectTitle" type="text" maxlength="100" placeholder="프로젝트 제목 입력"></label></div><div class="tools"><small id="save" role="status"></small><button id="undo" disabled title="Ctrl+Z">↶ 되돌리기</button><button id="importProject">불러오기</button><button id="exportProject">프로젝트 저장 ↓</button><input id="projectFile" type="file" accept=".json,application/json" hidden><button id="toggle" aria-expanded="true">편집 패널</button></div></header>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+ <defs>
+  <filter id="pencil-curve" filterUnits="userSpaceOnUse" x="-2" y="-2" width="28" height="28">
+   <feTurbulence type="fractalNoise" baseFrequency=".16 .21" numOctaves="1" seed="19" result="pencil-grain"/>
+   <feDisplacementMap in="SourceGraphic" in2="pencil-grain" scale="2.4" xChannelSelector="R" yChannelSelector="G"/>
+  </filter>
+ </defs>
+</svg>
+<main class="shell" id="shell">
+<section class="panel"><div class="head"><div><div class="eyebrow" id="cue"></div><h1 id="song"></h1><small id="summary"></small></div><div class="tools"><select id="scope" aria-label="배치 적용 범위"><option value="song">이 곡의 배치</option><option value="base">기본 배치</option></select><button id="reset">배치 초기화</button></div></div><div class="stage" id="stage" aria-label="무대 배치"></div><p class="note" id="note"></p><div class="transport"><div class="tools"><button id="prev" aria-label="이전 곡">←</button><button id="play" class="accent">▶ 재생</button><button id="next" aria-label="다음 곡">→</button><select id="speed" aria-label="곡당 재생 시간"><option value="1500">1.5초 / 곡</option><option value="3000" selected>3초 / 곡</option><option value="6000">6초 / 곡</option></select><small>곡 번호를 눌러 이동</small></div><nav class="rail" id="rail" aria-label="곡 타임라인"></nav></div></section>
+<aside class="panel" id="side"><div class="sidetabs" aria-label="편집 탭"><button id="setTab" aria-pressed="true">셋리스트</button><button id="instrumentTab" aria-pressed="false">악기</button><button id="ampTab" aria-pressed="false">앰프</button></div><div id="setEditor"><div class="head"><div><div class="eyebrow">01 / RUN OF SHOW</div><h2>큐 시트</h2></div><button id="add">＋ 곡 추가</button></div><div class="sheet" id="sheet"><table><thead id="columns"></thead><tbody id="rows"></tbody></table></div><div class="sheetfoot"><button id="up" aria-label="선택 곡 위로">↑</button><button id="down" aria-label="선택 곡 아래로">↓</button><button id="remove">선택 곡 삭제</button><button id="csv">CSV 내보내기</button></div><p class="sheethelp muted">셀을 직접 편집하거나 Excel에서 여러 셀을 복사해 붙여넣어. 번호를 누르면 해당 곡의 무대가 열려. 빈 파트는 무대에서 흐리게 표시돼.</p></div><section id="instrumentEditor" class="hide"><div class="head"><div><div class="eyebrow">03 / STAGE INSTRUMENTS</div><h2>무대 악기</h2></div><button id="addInstrument">＋ 악기 추가</button></div><p class="sheethelp muted">모든 곡에서 쓰는 악기와 보컬 포지션을 관리해. 곡별 담당자는 큐 시트에서 정해.</p><div class="amp-list" id="instruments"></div></section><section id="ampEditor" class="hide"><div class="head"><div><div class="eyebrow">02 / SIGNAL ROUTING</div><h2>앰프 패치</h2></div><button id="addAmp">＋ 앰프 추가</button></div><p class="sheethelp muted">입력마다 소스를 골라 연결해. 배선은 모든 곡에 공통 적용돼. 현재 곡에서 비어 있는 파트의 연결은 점선으로 표시돼.</p><div class="amp-list" id="amps"></div></section></aside>
+</main>
+<footer class="font-credit">한글 서체 <a href="https://fonts.google.com/specimen/Nanum+Pen+Script">나눔손글씨 펜</a> · 대체 서체 <a href="https://www.busan.go.kr/bhbusan">부산광역시 부산단디손글씨</a> (공공누리 제1유형)</footer>
+<dialog id="teamDialog" class="team-dialog" aria-labelledby="teamTitle">
+ <h2 id="teamTitle">팀 프로젝트</h2>
+ <form id="teamJoin">
+  <label>저장 기록에 남길 이름<input id="teamName" autocomplete="nickname" maxlength="40" required></label>
+  <div class="tools"><button type="submit">공유 프로젝트 열기</button></div>
+ </form>
+ <p id="teamIdentity" hidden></p>
+ <div class="tools">
+  <button id="teamSave" hidden>팀에 저장</button>
+  <button id="teamReload" hidden>최신 버전 불러오기</button>
+  <button id="teamLocal" hidden>로컬 프로젝트로 돌아가기</button>
+  <button id="teamClose">닫기</button>
+ </div>
+ <p id="teamStatus" role="status"></p>
+</dialog>
+<script>
+let teamStorage = null;
+const headers=['곡명','키보드','세컨 기타','보컬 1','MR','드럼','베이스','보컬 2','리드 기타','음향','기타사항','부'];
+const initial=[[]];
+const roles=[
+[5,50,23,'#594239','drum'],[1,20,32,'#394a73','keys'],[6,80,32,'#4f5967','guitar'],
+[2,19,59,'#386054','guitar'],[8,81,59,'#386054','guitar'],[3,38,79,'#84465f','mic'],[7,65,79,'#84465f','mic']
+];
+const icons={
+ drum:'<path d="M3 8C2 2 21 2 21 7c.2 5-18 6-18 1Zm0 0 .7 9c.1 4 15.8 4.7 17.2-.5L21 7M5 11l4 8 3.2-7.6 4.1 7 3-8"/><path class="pencil-mark" d="M5 6.5c2-2.4 10-3.4 14-1M5 17c2.4 1.5 4.1 1.6 5.8 1.8"/>',
+ keys:'<path d="M2.6 6.3 21.7 6l-.3 12.9-19.2.5ZM6.5 6.4 6 19m4-12.7.1 12.8m3.8-12.8-.2 12.8m4-12.9.3 12.9M5.9 7.2l.1 5.2m3.6-5.3-.1 5.4m7.8-5.5.2 5.1"/><path class="pencil-mark" d="m3.4 17.1 16.4-.4m-16.6 3.4 15.8-.4"/>',
+ guitar:'<path d="m12.8 9.2 6.7-6.7 2 1.9-6.3 7.1c2.3 2.3.7 4.2-2 4.4-1 4.1-5.7 6.4-8.8 3.8-3-2.8-1.8-7.6 2.2-8.2 1.7-.2 2.5-3.6 6.2-2.3Z M8.1 16.8 18.3 6.1m-11 9.4 2.1 2"/><path class="pencil-mark" d="M4.4 14.1c-1.1 1.5-.6 4.1 1 5.1M18.7 4l1.6 1.4"/>',
+ mic:'<path d="M8 6.1C8.1.7 15.8.4 16 6l-.1 5c-.1 5.4-7.8 5.7-8 0ZM5.2 10.9c-.8 4.2 2.6 7.1 6.5 7.2 4.2.1 7.5-3.2 7.2-7.3M11.9 18.3l.3 3.4m-4 .1 8-.2M8.4 7.2l7-.3"/><path class="pencil-mark" d="M9.3 5.6c.5-1.4 1.6-2.3 3.4-2.2m-3.2 6.2 5.3-.4"/>'
+};
+const instrumentTypes={keys:'키보드',guitar:'기타 / 베이스',drum:'드럼',mic:'보컬 / 마이크'};
+const defaultInstruments=roles.map(([id,x,y,color,icon])=>({id,name:headers[id],icon,home:[x,y]}));
+const defaults=Object.fromEntries(roles.map(([col,x,y])=>[col,[x,y]]));
+const key='stage-cue-v1';
+let data={songs:initial.map((row,i)=>({cells:headers.map((_,j)=>j===11?(i<10?'1':'2'):row[j]||''),positions:{}})),base:structuredClone(defaults),index:0};
+try{const stored=JSON.parse(localStorage.getItem(key));if(stored?.songs?.length&&stored.base)data=stored}catch{}
+data.instruments??=structuredClone(defaultInstruments);
+let timer=0;
+let selectedInstrumentId=null;
+let undoStack=[];
+let previousSnapshot=JSON.stringify(data);
+let pendingSnapshot=null;
+let pendingUndoTimer=0;
+let historyReady=false;
+const $=id=>document.getElementById(id);
+const pad=n=>String(n).padStart(2,'0');
+const current=()=>data.songs[data.index];
+function save(){
+ data.scope=$('scope').value;data.speed=$('speed').value;
+ const snapshot=JSON.stringify(data);
+ if(historyReady&&snapshot!==previousSnapshot){
+  if(pendingSnapshot===null)pendingSnapshot=previousSnapshot;
+  clearTimeout(pendingUndoTimer);
+  pendingUndoTimer=setTimeout(commitUndoStep,350);
+  previousSnapshot=snapshot;
+ }
+ try{
+  if(teamStorage)teamStorage(data);
+  else{localStorage.setItem(key,snapshot);$('save').textContent='브라우저 자동 저장'}
+ }
+ catch{$('save').textContent='저장 공간을 사용할 수 없음'}
+}
+function commitUndoStep(){
+ if(pendingSnapshot===null)return;
+ undoStack.push(pendingSnapshot);
+ if(undoStack.length>80)undoStack.shift();
+ pendingSnapshot=null;
+ $('undo').disabled=false;
+}
+function undo(){
+ if(pendingSnapshot!==null){clearTimeout(pendingUndoTimer);commitUndoStep()}
+ if(!undoStack.length)return;
+ const snapshot=undoStack.pop();
+ historyReady=false;pendingSnapshot=null;clearTimeout(pendingUndoTimer);
+ data=JSON.parse(snapshot);applyView();drawInstruments();drawAmps();drawRows();go(data.index);
+ previousSnapshot=JSON.stringify(data);historyReady=true;
+ $('undo').disabled=undoStack.length===0;
+}
+$('undo').onclick=undo;
+document.addEventListener('keydown',event=>{
+ if(!(event.ctrlKey||event.metaKey)||event.key.toLowerCase()!=='z'||event.shiftKey)return;
+ if(event.target.matches('input,textarea,[contenteditable="true"]'))return;
+ event.preventDefault();undo();
+});
+function make(tag,text){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;return node}
+function title(i){return data.songs[i].cells[0]||'제목 없음'}
+function position(col){
+ return ($('scope').value==='song'&&current().positions[col])||data.base[col]||
+  data.amps.find(amp=>amp.id===col)?.home||data.instruments.find(instrument=>instrument.id===col)?.home||[86,44];
+}
+function assignment(song,column){
+ return typeof column==='number'?song.cells[column]:song.assignments?.[column]??'';
+}
+function setAssignment(song,column,value){
+ if(typeof column==='number')song.cells[column]=value;
+ else (song.assignments??={})[column]=value;
+}
+function columnName(column){
+ return data.instruments.find(instrument=>instrument.id===column)?.name??headers[column];
+}
+function sheetColumns(){
+ const active=new Set(data.instruments.map(instrument=>instrument.id));
+ const existing=headers.map((_,column)=>column).filter(column=>!roles.some(([id])=>id===column)||active.has(column));
+ const custom=data.instruments.filter(instrument=>typeof instrument.id==='string').map(instrument=>instrument.id);
+ existing.splice(existing.indexOf(9),0,...custom);
+ return existing;
+}
+function patchSources(instruments){
+ return [4,...instruments.map(instrument=>instrument.id)];
+}
+const performerColumns=[...roles.map(([column])=>column),9];
+function performerName(value){
+ return (value||'').normalize('NFC').trim().replace(/\s*(?:\([^()]*\)|（[^（）]*）)\s*$/,'').trim();
+}
+const originalPerformers=[...new Set(initial.flatMap(row=>performerColumns.map(column=>performerName(row[column]))).filter(Boolean))];
+function performerColor(name){
+ const index=originalPerformers.indexOf(name);
+ if(index>=0){
+  const hue=(index*137.508+213)%360;
+  return 'hsl('+hue+' 68% '+(index%2===0?30:37)+'%)';
+ }
+ let hash=2166136261;
+ for(const char of name)hash=Math.imul(hash^char.codePointAt(0),16777619);
+ return 'hsl('+((hash>>>0)%360)+' 65% 32%)';
+}
+function colorPerformer(element,value){
+ const name=performerName(value);
+ if(name){
+  element.style.setProperty('--person',performerColor(name));
+  element.classList.add('performer');
+ }else{
+  element.style.removeProperty('--person');
+  element.classList.remove('performer');
+ }
+}
+function drawStage(){
+ const song=current(),cells=song.cells;
+ $('cue').textContent='CUE '+pad(data.index+1)+' / '+pad(data.songs.length)+(cells[11]?'  ·  '+cells[11]+'부':'');
+ $('song').textContent=title(data.index);
+ const names=data.instruments.map(({id})=>performerName(assignment(song,id))).filter(Boolean);
+ $('summary').textContent=names.length+'개 파트 · '+new Set(names).size+'명'+(cells[4]?' · MR '+cells[4]:'')+(cells[9]?' · 음향 '+cells[9]:'');
+ $('note').textContent=[cells[10],$('scope').value==='base'?'기본 위치는 곡별 위치가 없는 곡에 적용돼.':'드래그하거나 방향키로 이 곡의 위치를 조정해.'].filter(Boolean).join(' · ');
+ const slips=[];
+ const shown=data.instruments.map(({id,icon})=>[id,0,0,roles.find(([column])=>column===id)?.[3]??'var(--signal)',icon]);
+ if(data.amps.some(amp=>amp.inputs.includes(4)))shown.push([4,0,0,'#394a73','keys']);
+ for(const amp of data.amps)shown.push([amp.id,0,0,'var(--signal)','amp']);
+ $('stage').replaceChildren(wireLayer(),...shown.map(([col,,,color,icon])=>{
+  const amp=icon==='amp'?data.amps.find(item=>item.id===col):null;
+  const assigned=amp?'':assignment(song,col);
+  const instrument=!amp&&col!==4;
+  const assignedName=performerName(assigned);
+  const card=make('button');card.dataset.station=String(col);card.className='station'+(amp?' amp':instrument?(assignedName?' instrument assigned':' instrument unassigned inactive'):'');
+  card.style.setProperty('--role',amp?'#c76124':instrument?(assignedName?performerColor(assignedName):'#76600f'):color);
+  if(instrument&&assignedName)colorPerformer(card,assigned);
+  const label=make('span');
+  const name=amp?(amp.name||'앰프'):(col===4?'MR 재생':assigned||'미배정');
+  const detail=amp?amp.inputs.filter(Boolean).length+'/'+amp.inputs.length+' 입력':columnName(col);
+  const heading=make('b',name);
+  if(amp){heading.className='amp-title';if(amp.bt)heading.insertAdjacentHTML('beforeend',btIcon)}
+  label.append(heading,make('small',detail));card.setAttribute('aria-label',name+' '+detail+(amp?.bt?' 블루투스':''));
+  card.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><g filter="url(#pencil-curve)">'+(amp?ampIcon:icons[icon])+'</g></svg>';
+  if(instrument)card.append(make('small',detail));
+  else card.append(label);
+  card.onclick=()=>{
+   if(instrument){
+    selectedInstrumentId=selectedInstrumentId===col?null:col;
+    drawStage();
+    return;
+   }
+   if(!amp||selectedInstrumentId===null)return;
+   const existingInput=amp.inputs.indexOf(selectedInstrumentId);
+   if(existingInput>=0)amp.inputs[existingInput]=null;
+   else{
+    const emptyInput=amp.inputs.indexOf(null);
+    const inputIndex=emptyInput<0?amp.inputs.length:emptyInput;
+    amp.inputs[inputIndex]=selectedInstrumentId;
+   }
+   selectedInstrumentId=null;
+   save();
+   drawAmps();
+   drawStage();
+  };
+  if(instrument&&selectedInstrumentId===col)card.classList.add('link-selected');
+  const slip=instrument&&performerName(assigned)?make('button',assigned):null;
+  if(slip){
+   slip.className='name-slip stage-name';
+   slip.dataset.column=String(col);
+   slip.dataset.name=performerName(assigned);
+   slip.setAttribute('aria-label',assigned+' 이름표 · '+detail);
+   colorPerformer(slip,assigned);
+   slips.push({slip,card,col});
+  }
+  const paint=([x,y])=>{card.style.left=x+'%';card.style.top=y+'%'};
+  const commit=(x,y)=>{
+   const stage=$('stage'),marginX=50*card.offsetWidth/stage.clientWidth+1,marginY=50*card.offsetHeight/stage.clientHeight+1;
+   const next=[Math.min(100-marginX,Math.max(marginX,x)),Math.min(100-marginY,Math.max(marginY,y))];
+   ($('scope').value==='song'?song.positions:data.base)[col]=next;paint(next);
+   if(slip)paintNameSlip(slip,card,col);
+   drawWires();save();
+  };
+  paint(position(col));
+  let drag;
+  card.onpointerdown=e=>{if(e.button!==0)return;pause();drag={id:e.pointerId,x:e.clientX,y:e.clientY,start:position(col)};card.setPointerCapture(e.pointerId)};
+  card.onpointermove=e=>{if(drag?.id!==e.pointerId)return;const box=$('stage').getBoundingClientRect();if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>2||drag.moved){drag.moved=true;commit(drag.start[0]+(e.clientX-drag.x)/box.width*100,drag.start[1]+(e.clientY-drag.y)/box.height*100)}};
+  card.onlostpointercapture=()=>{drag=null};
+  card.onkeydown=e=>{const move={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!move)return;e.preventDefault();pause();const [x,y]=position(col);const step=e.shiftKey?5:1;commit(x+move[0]*step,y+move[1]*step)};
+  return card;
+ }));
+ for(const {slip,card,col} of slips){
+  $('stage').append(slip);
+  paintNameSlip(slip,card,col);
+  bindNameSlip(slip,card,col);
+ }
+ drawWires();
+ drawWaiting();
+}
+function selection(){
+ [...$('rows').rows].forEach((row,i)=>row.classList.toggle('selected',i===data.index));
+ [...$('rail').children].forEach((button,i)=>{button.classList.toggle('current',i===data.index);if(i===data.index)button.setAttribute('aria-current','step');else button.removeAttribute('aria-current')});
+ $('prev').disabled=$('up').disabled=data.index===0;$('next').disabled=$('down').disabled=data.index===data.songs.length-1;$('remove').disabled=data.songs.length===1;
+}
+function savedNamePosition(column){
+ const songPosition=current().namePositions?.[column];
+ return $('scope').value==='song'&&songPosition!==undefined?songPosition:data.namePositions?.[column];
+}
+function snapPoint(card,slip,column){
+ const stage=$('stage'),[x,y]=position(column);
+ return [stage.clientWidth*x/100,Math.min(stage.clientHeight-slip.offsetHeight/2-2,
+  stage.clientHeight*y/100+card.offsetHeight/2+slip.offsetHeight/2+3)];
+}
+function paintNameSlip(slip,card,column){
+ const saved=savedNamePosition(column);
+ if(saved){
+  slip.style.left=saved[0]+'%';
+  slip.style.top=saved[1]+'%';
+ }else{
+  const [x,y]=position(column);
+  slip.style.left=x+'%';
+  slip.style.top='min(calc('+y+'% + '+(card.offsetHeight/2+slip.offsetHeight/2+3)+'px), calc(100% - '+(slip.offsetHeight/2+2)+'px))';
+ }
+}
+function bindNameSlip(slip,card,column){
+ const stage=$('stage');
+ let drag;
+ const moveTo=(x,y,snap)=>{
+  const [anchorX,anchorY]=snapPoint(card,slip,column);
+  const marginX=slip.offsetWidth/2+2,marginY=slip.offsetHeight/2+2;
+  const owner=$('scope').value==='song'?current():data;
+  (owner.namePositions??={})[column]=snap&&Math.hypot(x-anchorX,y-anchorY)<=32?null:[
+   100*Math.max(marginX,Math.min(stage.clientWidth-marginX,x))/stage.clientWidth,
+   100*Math.max(marginY,Math.min(stage.clientHeight-marginY,y))/stage.clientHeight
+  ];
+  paintNameSlip(slip,card,column);
+ };
+ slip.onpointerdown=event=>{
+  if(event.button!==0)return;
+  pause();
+  for(const animation of slip.getAnimations())animation.cancel();
+  drag={id:event.pointerId,x:event.clientX,y:event.clientY,left:slip.offsetLeft,top:slip.offsetTop};
+  slip.setPointerCapture(event.pointerId);
+ };
+ slip.onpointermove=event=>{
+  if(drag?.id!==event.pointerId)return;
+  const dx=event.clientX-drag.x,dy=event.clientY-drag.y;
+  if(!drag.moved&&Math.hypot(dx,dy)<3)return;
+  drag.moved=true;
+  drag.lastX=event.clientX;drag.lastY=event.clientY;
+  moveTo(drag.left+dx,drag.top+dy,false);
+ };
+ slip.onlostpointercapture=()=>{
+  if(drag?.moved){
+   const target=document.elementFromPoint(drag.lastX,drag.lastY)?.closest('.station.instrument');
+   const nextColumn=data.instruments.find(item=>String(item.id)===target?.dataset.station)?.id;
+   if(nextColumn!==undefined&&nextColumn!==column){
+    const name=slip.textContent;
+    if(performerName(assignment(current(),column))===performerName(name))setAssignment(current(),column,'');
+    setAssignment(current(),nextColumn,name);
+    if(current().namePositions)delete current().namePositions[column];
+    (current().namePositions??={})[nextColumn]=null;
+    drawRows();drawStage();save();drag=null;return;
+   }
+   moveTo(slip.offsetLeft,slip.offsetTop,true);save();
+  }
+  drag=null;
+ };
+ slip.onkeydown=event=>{
+  const direction={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[event.key];
+  if(!direction&&event.key!=='Enter')return;
+  event.preventDefault();
+  pause();
+  if(direction){
+   const step=event.shiftKey?15:5;
+   moveTo(slip.offsetLeft+direction[0]*step,slip.offsetTop+direction[1]*step,false);
+  }else{
+   const [x,y]=snapPoint(card,slip,column);
+   moveTo(x,y,true);
+  }
+  save();
+ };
+}
+function drawWaiting(){
+ const stage=$('stage');
+ stage.querySelector('.waiting-names')?.remove();
+ const next=data.songs[data.index+1];
+ if(!timer||!next)return;
+ const onStage=new Set(data.instruments.map(({id})=>performerName(assignment(current(),id))));
+ const waiting=make('div');
+ waiting.className='waiting-names';
+ waiting.setAttribute('aria-label','다음 곡 대기');
+ for(const {id} of data.instruments){
+  const assigned=assignment(next,id),name=performerName(assigned);
+  if(!name||onStage.has(name))continue;
+  onStage.add(name);
+  const slip=make('span',assigned);
+  slip.className='name-slip';
+  slip.dataset.name=name;
+  colorPerformer(slip,assigned);
+  waiting.append(slip);
+ }
+ if(waiting.childElementCount)stage.append(waiting);
+}
+function performerLocations(selector='.stage-name'){
+ const stage=$('stage');
+ const bounds=stage.getBoundingClientRect();
+ return [...stage.querySelectorAll(selector)].map(card=>{
+  const column=card.dataset.column;
+  const box=card.getBoundingClientRect();
+  return {
+   card,column,name:card.dataset.name,
+   x:box.left+box.width/2-bounds.left-stage.clientLeft,
+   y:box.top+box.height/2-bounds.top-stage.clientTop
+  };
+ });
+}
+function animateMoves(previous,waiting){
+ const next=performerLocations();
+ const matches=[];
+ for(const from of previous){
+  for(const to of next){
+   if(from.name!==to.name)continue;
+   matches.push({from,to,distance:Math.hypot(from.x-to.x,from.y-to.y)});
+  }
+ }
+ const differentPart=({from,to})=>Number(from.column!==to.column);
+ matches.sort((a,b)=>differentPart(a)-differentPart(b)||a.distance-b.distance);
+ const usedOrigins=new Set(),usedDestinations=new Set();
+ const timing={duration:580,easing:'ease-in-out'};
+ for(const {from,to,distance} of matches){
+  if(usedOrigins.has(from)||usedDestinations.has(to))continue;
+  usedOrigins.add(from);
+  usedDestinations.add(to);
+  if(distance<2)continue;
+  to.card.animate([{translate:(from.x-to.x)+'px '+(from.y-to.y)+'px'},{translate:'0px 0px'}],timing);
+ }
+ const arrivals=next.filter(to=>to.name&&!usedDestinations.has(to));
+ for(const to of arrivals){
+  const from=waiting.get(to.name);
+  if(!from)continue;
+  to.card.animate([
+   {translate:(from.x-to.x)+'px '+(from.y-to.y)+'px'},
+   {translate:'0px 0px'}
+  ],timing);
+ }
+}
+function go(index,manual=true){
+ if(manual)pause();
+ const next=Math.min(data.songs.length-1,Math.max(0,index));
+ const animate=!manual&&timer&&next!==data.index&&!matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const previous=animate?performerLocations():[];
+ const waiting=new Map(animate?performerLocations('.waiting-names .name-slip').map(item=>[item.name,item]):[]);
+ data.index=next;
+ drawStage();
+ if(animate)animateMoves(previous,waiting);
+ selection();
+ save();
+ const rail=$('rail'),button=rail.children[data.index];
+ const offset=button.offsetLeft-rail.children[0].offsetLeft;
+ if(offset<rail.scrollLeft||offset+button.offsetWidth>rail.scrollLeft+rail.clientWidth)rail.scrollLeft=offset;
+}
+function pause(){clearInterval(timer);timer=0;drawWaiting();$('play').textContent='▶ 재생'}
+function start(){if(data.songs.length===1)return;if(data.index===data.songs.length-1)go(0,false);$('play').textContent='Ⅱ 일시정지';timer=setInterval(()=>{go(data.index+1,false);if(data.index===data.songs.length-1)pause()},Number($('speed').value));drawWaiting()}
+function drawRail(){$('rail').replaceChildren(...data.songs.map((song,i)=>{const b=make('button',pad(i+1));b.title=title(i);b.setAttribute('aria-label',(i+1)+'번 '+title(i));if(song.cells[11]==='2')b.className='act2';b.onclick=()=>go(i);return b}));selection()}
+function drawRows(){
+ const columns=sheetColumns();
+ const headings=make('tr');
+ headings.append(make('th','#'),...columns.map(column=>make('th',columnName(column))));
+ $('columns').replaceChildren(headings);
+ $('rows').replaceChildren(...data.songs.map((song,i)=>{
+  const row=make('tr'),cell=make('td'),b=make('button',pad(i+1));b.onclick=()=>go(i);b.setAttribute('aria-label',(i+1)+'번 곡 보기');cell.append(b);row.append(cell);
+  row.onclick=event=>{if(event.target.closest('input,button'))return;go(i)};
+  columns.forEach((column,j)=>{
+   const td=make('td'),input=make('input');
+   input.value=assignment(song,column);input.placeholder='—';input.dataset.row=i;input.dataset.col=j;
+   input.setAttribute('aria-label',(i+1)+'번 '+columnName(column));
+   const isPerformer=performerColumns.includes(column)||typeof column==='string';
+   if(isPerformer)colorPerformer(input,input.value);
+   input.onfocus=()=>{pause();if(data.index!==i)go(i)};
+   input.oninput=()=>{
+    setAssignment(song,column,input.value);
+    if(isPerformer)colorPerformer(input,input.value);
+    save();
+    if(column===0||column===11)drawRail();
+    if(i!==data.index)go(i);else drawStage();
+   };
+   td.append(input);row.append(td);
+  });
+  return row;
+ }));drawRail();
+}
+$('sheet').addEventListener('paste',e=>{
+ const input=e.target;if(input.tagName!=='INPUT')return;
+ const raw=e.clipboardData.getData('text/plain');if(!/[\t\n]/.test(raw))return;e.preventDefault();
+ const rows=raw.replace(/\r\n?/g,'\n').replace(/\n$/,'').split('\n');const r=Number(input.dataset.row),c=Number(input.dataset.col);
+ const columns=sheetColumns();
+ rows.forEach((line,i)=>{
+  const song=data.songs[r+i]||(data.songs[r+i]={cells:headers.map(()=>''),positions:{}});
+  line.split('\t').slice(0,columns.length-c).forEach((value,j)=>setAssignment(song,columns[c+j],value));
+ });
+ drawRows();go(r);$('rows').rows[r].cells[c+1].firstChild.focus();
+});
+$('play').onclick=()=>timer?pause():start();$('speed').onchange=()=>{if(timer){pause();start()}save()};$('prev').onclick=()=>go(data.index-1);$('next').onclick=()=>go(data.index+1);
+$('scope').onchange=()=>{pause();drawStage();save()};
+$('reset').onclick=()=>{pause();if($('scope').value==='song'){current().positions={};delete current().namePositions}else{data.base=structuredClone(defaults);delete data.namePositions}drawStage();save()};
+$('toggle').onclick=()=>{const hidden=$('side').classList.toggle('hide');$('shell').classList.toggle('wide',hidden);$('toggle').setAttribute('aria-expanded',!hidden)};
+$('add').onclick=()=>{data.songs.push({cells:headers.map((_,i)=>i===11?current().cells[11]:''),positions:{}});drawRows();go(data.songs.length-1);$('rows').lastChild.cells[1].firstChild.focus()};
+$('remove').onclick=()=>{if(data.songs.length>1&&confirm('선택한 곡을 삭제할까?')){data.songs.splice(data.index,1);data.index=Math.min(data.index,data.songs.length-1);drawRows();go(data.index)}};
+function move(delta){const i=data.index;[data.songs[i],data.songs[i+delta]]=[data.songs[i+delta],data.songs[i]];data.index=i+delta;drawRows();go(data.index)}
+$('up').onclick=()=>move(-1);$('down').onclick=()=>move(1);
+$('csv').onclick=()=>{const columns=sheetColumns();const rows=[columns.map(columnName),...data.songs.map(song=>columns.map(column=>assignment(song,column)))];const csv=rows.map(row=>row.map(v=>'"'+(/^[=+\-@\t\r]/.test(v)?"'":'')+v.replaceAll('"','""')+'"').join(',')).join('\r\n');const url=URL.createObjectURL(new Blob(['\ufeff',csv],{type:'text/csv;charset=utf-8'}));const link=make('a');link.href=url;link.download='stage-cue-setlist.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+const ampDefaults=[
+ {id:'amp-1',name:'앰프 1',bt:false,inputs:[3,4],home:[25,14]},
+ {id:'amp-2',name:'앰프 2',bt:false,inputs:[8],home:[76,14]},
+ {id:'amp-3',name:'앰프 3',bt:false,inputs:[7,1],home:[18,47]}
+];
+data.amps??=structuredClone(ampDefaults);
+const sourceCols=[1,2,3,4,5,6,7,8];
+const svgNS='http://www.w3.org/2000/svg';
+const ampIcon='<path d="m3 5.4 17.7-.3 1.1 13.1-19.5.8ZM11.1 12.2c0 4.2-6.3 4.7-6.3.2-.1-4.3 6.6-4.8 6.3-.2Zm3.2-2.3 4.5-.3m-4.4 4.5 4.3-.1"/><path class="pencil-mark" d="m3.7 17.1 16.5-.6m-14-5.3 2.3-1.1"/>';
+const btIcon='<svg class="bt" viewBox="0 0 24 24" aria-hidden="true"><path d="m12.1 3-.3 18 6.1-5.1L6.4 7.1m5.7-4.1 5.8 5L6.1 16.9"/></svg>';
+function svg(tag,attrs={}){
+ const element=document.createElementNS(svgNS,tag);
+ for(const [key,value] of Object.entries(attrs))element.setAttribute(key,value);
+ return element;
+}
+function wireLayer(){
+ const layer=svg('svg',{class:'wires','aria-hidden':'true'});
+ const defs=svg('defs'),marker=svg('marker',{id:'amp-arrow',viewBox:'0 0 10 10',refX:9,refY:5,markerWidth:7,markerHeight:7,orient:'auto'});
+ marker.append(svg('path',{d:'M0 0L10 5L0 10Z',fill:'var(--wire)'}));defs.append(marker);layer.append(defs);
+ return layer;
+}
+function drawWires(){
+ const stage=$('stage'),layer=stage.querySelector('.wires');
+ if(!layer)return;
+ layer.replaceChildren(layer.firstChild);
+ const bounds=layer.getBoundingClientRect(), cards=new Map([...stage.querySelectorAll('.station')].map(card=>[card.dataset.station,card.getBoundingClientRect()]));
+ function point(box,x,y){return [box.left-bounds.left+box.width*x,box.top-bounds.top+box.height*y]}
+ for(const amp of data.amps){
+  const target=cards.get(amp.id);
+  if(!target)continue;
+  amp.inputs.forEach((source,i)=>{
+   const from=cards.get(String(source));
+   if(!from)return;
+   const dx=target.left+target.width/2-from.left-from.width/2;
+   const dy=target.top+target.height/2-from.top-from.height/2;
+   const horizontal=Math.abs(dx)/target.width>Math.abs(dy)/target.height;
+   const port=(i+1)/(amp.inputs.length+1);
+   const [x1,y1]=horizontal?point(from,dx>0?1:0,.5):point(from,.5,dy>0?1:0);
+   const [x2,y2]=horizontal?point(target,dx>0?0:1,port):point(target,port,dy>0?0:1);
+   const path=svg('line',{x1,y1,x2,y2,stroke:'var(--wire)','stroke-width':1.7,'marker-end':'url(#amp-arrow)'});
+   if(!assignment(current(),source).trim()){path.setAttribute('stroke-dasharray','4 5');path.setAttribute('opacity','.48')}
+   layer.append(path);
+  });
+ }
+}
+function ampChanged(){pause();drawStage();save()}
+function drawAmps(){
+ const cards=data.amps.map((amp,index)=>{
+  const card=make('section'),fields=make('div'),ports=make('div');
+  card.className='amp-editor';fields.className='amp-fields';ports.className='amp-ports';
+  function field(parent,text,control){const label=make('label',text);label.append(control);parent.append(label)}
+  const name=make('input');name.value=amp.name;name.maxLength=40;
+  name.oninput=()=>{amp.name=name.value;ampChanged()};
+  const count=make('input');count.type='number';count.min=1;count.max=32;count.value=amp.inputs.length;
+  count.onchange=()=>{
+   const size=Math.max(1,Math.min(32,Math.trunc(count.valueAsNumber)||amp.inputs.length));
+   count.value=size;
+   if(size===amp.inputs.length)return;
+   if(amp.inputs.slice(size).some(Boolean)&&!confirm('줄어드는 입력의 연결을 삭제할까?')){count.value=amp.inputs.length;return}
+   amp.inputs=Array.from({length:size},(_,i)=>amp.inputs[i]??null);
+   drawAmps();ampChanged();$('amps').children[index].querySelector('input[type=number]').focus();
+  };
+  const bt=make('input');bt.type='checkbox';bt.checked=amp.bt;
+  bt.onchange=()=>{amp.bt=bt.checked;ampChanged()};
+  field(fields,'이름',name);field(fields,'입력 수',count);field(fields,'블루투스',bt);
+  const remove=make('button','삭제');
+  remove.onclick=()=>{
+   if(!confirm((amp.name||'앰프')+'를 삭제할까?'))return;
+   data.amps.splice(index,1);delete data.base[amp.id];
+   for(const song of data.songs)delete song.positions[amp.id];
+   drawAmps();ampChanged();$('addAmp').focus();
+  };
+  fields.append(remove);
+  amp.inputs.forEach((source,i)=>{
+   const select=make('select');
+   const sources=patchSources(data.instruments);
+   for(const col of [null,...sources]){
+    const option=make('option',col===null?'연결 없음':columnName(col));option.value=col??'';select.append(option);
+   }
+   select.value=source??'';
+   select.onchange=()=>{amp.inputs[i]=sources.find(col=>String(col)===select.value)??null;ampChanged()};
+   field(ports,'IN '+(i+1),select);
+  });
+  card.append(fields,ports);return card;
+ });
+ $('amps').replaceChildren(...(cards.length?cards:[make('p','앰프를 추가하면 무대에서 위치를 옮길 수 있어.')]));
+}
+function refreshInstrumentLayout(){
+ pause();
+ drawRows();
+ drawAmps();
+ drawStage();
+ save();
+}
+function drawInstruments(){
+ const cards=data.instruments.map(instrument=>{
+  const card=make('section');
+  card.className='amp-editor amp-fields';
+  const nameField=make('label','이름');
+  const name=make('input');
+  name.value=instrument.name;
+  name.maxLength=40;
+  name.onchange=()=>{
+   instrument.name=name.value.trim()||instrumentTypes[instrument.icon];
+   name.value=instrument.name;
+   refreshInstrumentLayout();
+  };
+  nameField.append(name);
+  const typeField=make('label','종류');
+  const type=make('select');
+  for(const [icon,label] of Object.entries(instrumentTypes)){
+   const option=make('option',label);
+   option.value=icon;
+   type.append(option);
+  }
+  type.value=instrument.icon;
+  type.onchange=()=>{instrument.icon=type.value;refreshInstrumentLayout()};
+  typeField.append(type);
+  const remove=make('button','삭제');
+  remove.onclick=()=>{
+   if(!confirm(instrument.name+'을(를) 삭제할까? 곡별 담당자, 배치와 앰프 연결도 함께 지워져.'))return;
+   const {id}=instrument;
+   data.instruments=data.instruments.filter(item=>item.id!==id);
+   delete data.base[id];
+   if(data.namePositions)delete data.namePositions[id];
+   for(const song of data.songs){
+    delete song.positions[id];
+    if(song.namePositions)delete song.namePositions[id];
+    if(typeof id==='number')song.cells[id]='';
+    else if(song.assignments)delete song.assignments[id];
+   }
+   for(const amp of data.amps)amp.inputs=amp.inputs.map(source=>source===id?null:source);
+   drawInstruments();
+   refreshInstrumentLayout();
+   $('addInstrument').focus();
+  };
+  card.append(nameField,typeField,remove);
+  return card;
+ });
+ $('instruments').replaceChildren(...(cards.length?cards:[make('p','악기를 추가하면 무대와 큐 시트에 표시돼.')]));
+}
+const editorTabs=['set','instrument','amp'];
+for(const tab of editorTabs){
+ $(tab+'Tab').onclick=()=>{
+  for(const item of editorTabs){
+   $(item+'Editor').classList.toggle('hide',item!==tab);
+   $(item+'Tab').setAttribute('aria-pressed',item===tab);
+  }
+ };
+}
+$('addInstrument').onclick=()=>{
+ const id='instrument-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8);
+ const index=data.instruments.length;
+ data.instruments.push({id,name:'새 악기',icon:'guitar',home:[25+(index%3)*25,48]});
+ drawInstruments();
+ refreshInstrumentLayout();
+ const name=$('instruments').lastChild.querySelector('input');
+ name.focus();
+ name.select();
+};
+$('addAmp').onclick=()=>{
+ const n=data.amps.length;
+ data.amps.push({id:'amp-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),name:'새 앰프',bt:false,inputs:[null],home:[20+(n%4)*20,12+(Math.floor(n/4)%3)*12]});
+ drawAmps();ampChanged();$('amps').lastChild.querySelector('input').focus();
+};
+new ResizeObserver(drawWires).observe($('stage'));
+function downloadFile(name,body,type){
+ const url=URL.createObjectURL(new Blob([body],{type}));
+ const link=make('a');link.href=url;link.download=name;link.click();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function readProject(text){
+ const doc=JSON.parse(text);
+ if(doc?.format!=='stage-cue'||doc.version!==1)throw Error('Stage Cue 프로젝트 v1 파일을 선택해.');
+ const project=doc.project;
+ const pair=p=>Array.isArray(p)&&p.length===2&&p.every(n=>Number.isFinite(n)&&n>=0&&n<=100);
+ const record=obj=>obj!==null&&typeof obj==='object'&&!Array.isArray(obj);
+ if(!record(project)||(project.title!==undefined&&(typeof project.title!=='string'||project.title.length>100)))throw Error('프로젝트 데이터가 손상됐거나 형식이 달라.');
+ const instruments=project.instruments===undefined?structuredClone(defaultInstruments):project.instruments;
+ const instrumentIds=new Set();
+ const validInstrument=instrument=>{
+  if(!record(instrument)||instrumentIds.has(instrument.id)||
+     !(defaultInstruments.some(({id})=>id===instrument.id)||(typeof instrument.id==='string'&&/^instrument-[a-z0-9-]+$/.test(instrument.id)))||
+     typeof instrument.name!=='string'||!instrument.name.trim()||!Object.hasOwn(instrumentTypes,instrument.icon)||!pair(instrument.home))return false;
+  instrumentIds.add(instrument.id);
+  return true;
+ };
+ if(!Array.isArray(instruments)||!instruments.every(validInstrument))throw Error('프로젝트의 악기 목록을 읽을 수 없어.');
+ const sources=patchSources(instruments);
+ const customIds=new Set(instruments.filter(({id})=>typeof id==='string').map(({id})=>id));
+ const ids=new Set();
+ const validAmp=amp=>{
+  if(!record(amp)||typeof amp.id!=='string'||!/^amp-[a-z0-9-]+$/.test(amp.id)||ids.has(amp.id)||
+     typeof amp.name!=='string'||typeof amp.bt!=='boolean'||!pair(amp.home)||
+     !Array.isArray(amp.inputs)||amp.inputs.length<1||amp.inputs.length>32||
+     !amp.inputs.every(col=>col===null||sources.includes(col)))return false;
+  ids.add(amp.id);return true;
+ };
+ const positions=obj=>record(obj)&&Object.entries(obj).every(([id,value])=>(ids.has(id)||customIds.has(id)||sourceCols.some(col=>String(col)===id))&&pair(value));
+ const namePositions=obj=>obj===undefined||record(obj)&&Object.entries(obj).every(([id,value])=>instruments.some(instrument=>String(instrument.id)===id)&&(value===null||pair(value)));
+ const assignments=obj=>obj===undefined||record(obj)&&Object.entries(obj).every(([id,value])=>customIds.has(id)&&typeof value==='string');
+ if(!Array.isArray(project.amps)||!project.amps.every(validAmp)||
+    !positions(project.base)||!namePositions(project.namePositions)||!Array.isArray(project.songs)||!project.songs.length||
+    !project.songs.every(song=>record(song)&&Array.isArray(song.cells)&&song.cells.length===headers.length&&
+      song.cells.every(cell=>typeof cell==='string')&&positions(song.positions)&&namePositions(song.namePositions)&&assignments(song.assignments))||
+    !Number.isInteger(project.index)||project.index<0||project.index>=project.songs.length){
+  throw Error('프로젝트 데이터가 손상됐거나 형식이 달라.');
+ }
+ project.instruments=instruments;
+ return project;
+}
+$('projectTitle').oninput=event=>{data.title=event.currentTarget.value;save()};
+function applyView(){
+ $('projectTitle').value=data.title??'';
+ $('scope').value=data.scope==='base'?'base':'song';
+ const speed=String(data.speed);
+ $('speed').value=['1500','3000','6000'].includes(speed)?speed:'3000';
+}
+$('exportProject').onclick=()=>{
+ save();
+ const date=new Date();
+ const stamp=[date.getFullYear(),pad(date.getMonth()+1),pad(date.getDate())].join('-');
+ downloadFile('stage-cue-'+stamp+'.json',JSON.stringify({format:'stage-cue',version:1,project:data},null,2),'application/json');
+};
+$('importProject').onclick=()=>$('projectFile').click();
+$('projectFile').onchange=async event=>{
+ const input=event.currentTarget,file=input.files[0];
+ input.value='';
+ if(!file)return;
+ let project;
+ try{project=readProject(await file.text())}
+ catch(error){alert(error instanceof SyntaxError?'JSON 파일을 읽을 수 없어.':error.message);return}
+ if(!confirm('현재 프로젝트를 이 파일의 설정으로 바꿀까?'))return;
+ pause();data=project;applyView();drawInstruments();drawAmps();drawRows();go(data.index);
+};
+applyView();drawInstruments();drawAmps();
+drawRows();go(data.index);
+previousSnapshot=JSON.stringify(data);historyReady=true;undoStack=[];$('undo').disabled=true;
+window.stageCueEditor={
+ snapshot:()=>structuredClone(data),
+ decode:project=>readProject(JSON.stringify({format:'stage-cue',version:1,project})),
+ open(project,storage){
+  pause();
+  teamStorage=storage;
+  clearTimeout(pendingUndoTimer);
+  pendingSnapshot=null;
+  historyReady=false;
+  undoStack=[];
+  selectedInstrumentId=null;
+  data=project;
+  applyView();
+  drawInstruments();drawAmps();drawRows();go(data.index);
+  previousSnapshot=JSON.stringify(data);
+  historyReady=true;
+  $('undo').disabled=true;
+ },
+ status:message=>{$('save').textContent=message}
+};
+</script>
+<script src="./team-config.js" defer></script>
+<script src="./team-sync.js" defer></script>
+</html>
