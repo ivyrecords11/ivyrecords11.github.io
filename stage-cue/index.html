@@ -956,7 +956,8 @@ window.stageCueEditor={
   historyReady=true;
   $('undo').disabled=true;
  },
- status:message=>{$('save').textContent=message}
+ status:message=>{$('save').textContent=message},
+ refreshStage:()=>drawStage()
 };
 </script>
 <script src="./team-config.js" defer></script>
