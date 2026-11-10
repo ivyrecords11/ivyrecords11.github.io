@@ -171,8 +171,8 @@ td,th{
  </defs>
 </svg>
 <main class="shell" id="shell">
-<section class="panel"><div class="head"><div><div class="eyebrow" id="cue"></div><h1 id="song"></h1><small id="summary"></small></div><div class="tools"><select id="scope" aria-label="배치 적용 범위"><option value="song">이 곡의 배치</option><option value="base">기본 배치</option></select><button id="reset">배치 초기화</button></div></div><div class="stage" id="stage" aria-label="무대 배치"></div><p class="note" id="note"></p><div class="transport"><div class="tools"><button id="prev" aria-label="이전 곡">←</button><button id="play" class="accent">▶ 재생</button><button id="next" aria-label="다음 곡">→</button><select id="speed" aria-label="곡당 재생 시간"><option value="1500">1.5초 / 곡</option><option value="3000" selected>3초 / 곡</option><option value="6000">6초 / 곡</option></select><small>곡 번호를 눌러 이동</small></div><nav class="rail" id="rail" aria-label="곡 타임라인"></nav></div></section>
-<aside class="panel" id="side"><div class="sidetabs" aria-label="편집 탭"><button id="setTab" aria-pressed="true">셋리스트</button><button id="instrumentTab" aria-pressed="false">악기</button><button id="ampTab" aria-pressed="false">앰프</button></div><div id="setEditor"><div class="head"><div><div class="eyebrow">01 / RUN OF SHOW</div><h2>큐 시트</h2></div><button id="add">＋ 곡 추가</button></div><div class="sheet" id="sheet"><table><thead id="columns"></thead><tbody id="rows"></tbody></table></div><div class="sheetfoot"><button id="up" aria-label="선택 곡 위로">↑</button><button id="down" aria-label="선택 곡 아래로">↓</button><button id="remove">선택 곡 삭제</button><button id="csv">CSV 내보내기</button></div><p class="sheethelp muted">셀을 직접 편집하거나 Excel에서 여러 셀을 복사해 붙여넣어. 번호를 누르면 해당 곡의 무대가 열려. 빈 파트는 무대에서 흐리게 표시돼.</p></div><section id="instrumentEditor" class="hide"><div class="head"><div><div class="eyebrow">03 / STAGE INSTRUMENTS</div><h2>무대 악기</h2></div><button id="addInstrument">＋ 악기 추가</button></div><p class="sheethelp muted">모든 곡에서 쓰는 악기와 보컬 포지션을 관리해. 곡별 담당자는 큐 시트에서 정해.</p><div class="amp-list" id="instruments"></div></section><section id="ampEditor" class="hide"><div class="head"><div><div class="eyebrow">02 / SIGNAL ROUTING</div><h2>앰프 패치</h2></div><button id="addAmp">＋ 앰프 추가</button></div><p class="sheethelp muted">입력마다 소스를 골라 연결해. 배선은 모든 곡에 공통 적용돼. 현재 곡에서 비어 있는 파트의 연결은 점선으로 표시돼.</p><div class="amp-list" id="amps"></div></section></aside>
+<section class="panel"><div class="head"><div><div class="eyebrow" id="cue"></div><h1 id="song"></h1><small id="summary"></small></div><div class="tools"><select id="scope" aria-label="배치와 연결의 적용 범위"><option value="song">이 곡만</option><option value="base">전체 기본값</option></select><button id="resetSong" title="현재 곡의 위치와 연결을 전체 기본값으로 되돌려">이 곡을 기본값으로</button></div></div><div class="stage" id="stage" aria-label="무대 배치"></div><p class="note" id="note"></p><div class="transport"><div class="tools"><button id="prev" aria-label="이전 곡">←</button><button id="play" class="accent">▶ 재생</button><button id="next" aria-label="다음 곡">→</button><select id="speed" aria-label="곡당 재생 시간"><option value="1500">1.5초 / 곡</option><option value="3000" selected>3초 / 곡</option><option value="6000">6초 / 곡</option></select><small>곡 번호를 눌러 이동</small></div><nav class="rail" id="rail" aria-label="곡 타임라인"></nav></div></section>
+<aside class="panel" id="side"><div class="sidetabs" aria-label="편집 탭"><button id="setTab" aria-pressed="true">셋리스트</button><button id="instrumentTab" aria-pressed="false">악기</button><button id="ampTab" aria-pressed="false">앰프</button></div><div id="setEditor"><div class="head"><div><div class="eyebrow">01 / RUN OF SHOW</div><h2>큐 시트</h2></div><button id="add">＋ 곡 추가</button></div><div class="sheet" id="sheet"><table><thead id="columns"></thead><tbody id="rows"></tbody></table></div><div class="sheetfoot"><button id="up" aria-label="선택 곡 위로">↑</button><button id="down" aria-label="선택 곡 아래로">↓</button><button id="remove">선택 곡 삭제</button><button id="csv">CSV 내보내기</button></div><p class="sheethelp muted">셀을 직접 편집하거나 Excel에서 여러 셀을 복사해 붙여넣어. 번호를 누르면 해당 곡의 무대가 열려. 빈 파트는 무대에서 흐리게 표시돼.</p></div><section id="instrumentEditor" class="hide"><div class="head"><div><div class="eyebrow">03 / STAGE INSTRUMENTS</div><h2>무대 악기</h2></div><button id="addInstrument">＋ 악기 추가</button></div><p class="sheethelp muted">모든 곡에서 쓰는 악기와 보컬 포지션을 관리해. 곡별 담당자는 큐 시트에서 정해.</p><div class="amp-list" id="instruments"></div></section><section id="ampEditor" class="hide"><div class="head"><div><div class="eyebrow">02 / SIGNAL ROUTING</div><h2>앰프 패치</h2></div><button id="addAmp">＋ 앰프 추가</button></div><p class="sheethelp muted">위의 적용 범위에 따라 입력마다 연결을 골라. 곡별로 바꾸지 않은 입력은 전체 기본값을 따라가. 앰프 이름과 입력 수는 모든 곡에서 공통이야.</p><div class="amp-list" id="amps"></div></section></aside>
 </main>
 <footer class="font-credit">한글 서체 <a href="https://fonts.google.com/specimen/Nanum+Pen+Script">나눔손글씨 펜</a> · 대체 서체 <a href="https://www.busan.go.kr/bhbusan">부산광역시 부산단디손글씨</a> (공공누리 제1유형)</footer>
 <dialog id="teamDialog" class="team-dialog" aria-labelledby="teamTitle">
@@ -264,6 +264,29 @@ function position(col){
  return ($('scope').value==='song'&&current().positions[col])||data.base[col]||
   data.amps.find(amp=>amp.id===col)?.home||data.instruments.find(instrument=>instrument.id===col)?.home||[86,44];
 }
+function routingSong(){
+ return $('scope').value==='song'?current():null;
+}
+function ampInputs(amp,song=routingSong()){
+ const overrides=song?.ampRouting?.[amp.id];
+ return amp.inputs.map((source,index)=>overrides&&Object.hasOwn(overrides,index)?overrides[index]:source);
+}
+function setAmpInput(amp,index,source){
+ const song=routingSong();
+ if(!song){
+  amp.inputs[index]=source;
+  return;
+ }
+ if(source!==undefined){
+  ((song.ampRouting??={})[amp.id]??={})[index]=source;
+  return;
+ }
+ const overrides=song.ampRouting?.[amp.id];
+ if(!overrides)return;
+ delete overrides[index];
+ if(!Object.keys(overrides).length)delete song.ampRouting[amp.id];
+ if(!Object.keys(song.ampRouting).length)delete song.ampRouting;
+}
 function assignment(song,column){
  return typeof column==='number'?song.cells[column]:song.assignments?.[column]??'';
 }
@@ -318,7 +341,7 @@ function drawStage(){
  $('note').textContent=[cells[10],$('scope').value==='base'?'기본 위치는 곡별 위치가 없는 곡에 적용돼.':'드래그하거나 방향키로 이 곡의 위치를 조정해.'].filter(Boolean).join(' · ');
  const slips=[];
  const shown=data.instruments.map(({id,icon})=>[id,0,0,roles.find(([column])=>column===id)?.[3]??'var(--signal)',icon]);
- if(data.amps.some(amp=>amp.inputs.includes(4)))shown.push([4,0,0,'#394a73','keys']);
+ if(data.amps.some(amp=>ampInputs(amp).includes(4)))shown.push([4,0,0,'#394a73','keys']);
  for(const amp of data.amps)shown.push([amp.id,0,0,'var(--signal)','amp']);
  $('stage').replaceChildren(wireLayer(),...shown.map(([col,,,color,icon])=>{
   const amp=icon==='amp'?data.amps.find(item=>item.id===col):null;
@@ -330,7 +353,7 @@ function drawStage(){
   if(instrument&&assignedName)colorPerformer(card,assigned);
   const label=make('span');
   const name=amp?(amp.name||'앰프'):(col===4?'MR 재생':assigned||'미배정');
-  const detail=amp?amp.inputs.filter(Boolean).length+'/'+amp.inputs.length+' 입력':columnName(col);
+  const detail=amp?ampInputs(amp).filter(Boolean).length+'/'+amp.inputs.length+' 입력':columnName(col);
   const heading=make('b',name);
   if(amp){heading.className='amp-title';if(amp.bt)heading.insertAdjacentHTML('beforeend',btIcon)}
   label.append(heading,make('small',detail));card.setAttribute('aria-label',name+' '+detail+(amp?.bt?' 블루투스':''));
@@ -344,12 +367,16 @@ function drawStage(){
     return;
    }
    if(!amp||selectedInstrumentId===null)return;
-   const existingInput=amp.inputs.indexOf(selectedInstrumentId);
-   if(existingInput>=0)amp.inputs[existingInput]=null;
+   const inputs=ampInputs(amp);
+   const existingInput=inputs.indexOf(selectedInstrumentId);
+   if(existingInput>=0)setAmpInput(amp,existingInput,null);
    else{
-    const emptyInput=amp.inputs.indexOf(null);
-    const inputIndex=emptyInput<0?amp.inputs.length:emptyInput;
-    amp.inputs[inputIndex]=selectedInstrumentId;
+    const emptyInput=inputs.indexOf(null);
+    if(emptyInput<0&&(routingSong()||inputs.length>=32)){
+     alert('빈 입력이 없어. 앰프 탭에서 연결을 바꾸거나 입력 수를 늘려 줘.');
+     return;
+    }
+    setAmpInput(amp,emptyInput<0?inputs.length:emptyInput,selectedInstrumentId);
    }
    selectedInstrumentId=null;
    save();
@@ -545,6 +572,8 @@ function go(index,manual=true){
  const previous=animate?performerLocations():[];
  const waiting=new Map(animate?performerLocations('.waiting-names .name-slip').map(item=>[item.name,item]):[]);
  data.index=next;
+ selectedInstrumentId=null;
+ drawAmps();
  drawStage();
  if(animate)animateMoves(previous,waiting);
  selection();
@@ -595,8 +624,19 @@ $('sheet').addEventListener('paste',e=>{
  drawRows();go(r);$('rows').rows[r].cells[c+1].firstChild.focus();
 });
 $('play').onclick=()=>timer?pause():start();$('speed').onchange=()=>{if(timer){pause();start()}save()};$('prev').onclick=()=>go(data.index-1);$('next').onclick=()=>go(data.index+1);
-$('scope').onchange=()=>{pause();drawStage();save()};
-$('reset').onclick=()=>{pause();if($('scope').value==='song'){current().positions={};delete current().namePositions}else{data.base=structuredClone(defaults);delete data.namePositions}drawStage();save()};
+$('scope').onchange=()=>{pause();selectedInstrumentId=null;drawAmps();drawStage();save()};
+$('resetSong').onclick=()=>{
+ pause();
+ const song=current();
+ song.positions={};
+ delete song.namePositions;
+ delete song.ampRouting;
+ $('scope').value='song';
+ selectedInstrumentId=null;
+ drawAmps();
+ drawStage();
+ save();
+};
 $('toggle').onclick=()=>{const hidden=$('side').classList.toggle('hide');$('shell').classList.toggle('wide',hidden);$('toggle').setAttribute('aria-expanded',!hidden)};
 $('add').onclick=()=>{data.songs.push({cells:headers.map((_,i)=>i===11?current().cells[11]:''),positions:{}});drawRows();go(data.songs.length-1);$('rows').lastChild.cells[1].firstChild.focus()};
 $('remove').onclick=()=>{if(data.songs.length>1&&confirm('선택한 곡을 삭제할까?')){data.songs.splice(data.index,1);data.index=Math.min(data.index,data.songs.length-1);drawRows();go(data.index)}};
@@ -633,7 +673,7 @@ function drawWires(){
  for(const amp of data.amps){
   const target=cards.get(amp.id);
   if(!target)continue;
-  amp.inputs.forEach((source,i)=>{
+  ampInputs(amp).forEach((source,i)=>{
    const from=cards.get(String(source));
    if(!from)return;
    const dx=target.left+target.width/2-from.left-from.width/2;
@@ -661,8 +701,15 @@ function drawAmps(){
    const size=Math.max(1,Math.min(32,Math.trunc(count.valueAsNumber)||amp.inputs.length));
    count.value=size;
    if(size===amp.inputs.length)return;
-   if(amp.inputs.slice(size).some(Boolean)&&!confirm('줄어드는 입력의 연결을 삭제할까?')){count.value=amp.inputs.length;return}
+   const hasRemovedConnections=amp.inputs.slice(size).some(Boolean)||
+    data.songs.some(song=>ampInputs(amp,song).slice(size).some(Boolean));
+   if(hasRemovedConnections&&!confirm('줄어드는 입력의 기본 연결과 곡별 연결을 삭제할까?')){count.value=amp.inputs.length;return}
    amp.inputs=Array.from({length:size},(_,i)=>amp.inputs[i]??null);
+   for(const song of data.songs){
+    const overrides=song.ampRouting?.[amp.id];
+    if(!overrides)continue;
+    for(const index of Object.keys(overrides))if(Number(index)>=size)delete overrides[index];
+   }
    drawAmps();ampChanged();$('amps').children[index].querySelector('input[type=number]').focus();
   };
   const bt=make('input');bt.type='checkbox';bt.checked=amp.bt;
@@ -672,18 +719,33 @@ function drawAmps(){
   remove.onclick=()=>{
    if(!confirm((amp.name||'앰프')+'를 삭제할까?'))return;
    data.amps.splice(index,1);delete data.base[amp.id];
-   for(const song of data.songs)delete song.positions[amp.id];
+   for(const song of data.songs){
+    delete song.positions[amp.id];
+    if(song.ampRouting)delete song.ampRouting[amp.id];
+   }
    drawAmps();ampChanged();$('addAmp').focus();
   };
   fields.append(remove);
-  amp.inputs.forEach((source,i)=>{
+  ampInputs(amp).forEach((source,i)=>{
    const select=make('select');
    const sources=patchSources(data.instruments);
+   const song=routingSong();
+   const overrides=song?.ampRouting?.[amp.id];
+   if(song){
+    const defaultSource=amp.inputs[i];
+    const option=make('option','기본값 · '+(defaultSource===null?'연결 없음':columnName(defaultSource)));
+    option.value='inherit';
+    select.append(option);
+   }
    for(const col of [null,...sources]){
     const option=make('option',col===null?'연결 없음':columnName(col));option.value=col??'';select.append(option);
    }
-   select.value=source??'';
-   select.onchange=()=>{amp.inputs[i]=sources.find(col=>String(col)===select.value)??null;ampChanged()};
+   select.value=song&&!(overrides&&Object.hasOwn(overrides,i))?'inherit':source??'';
+   select.onchange=()=>{
+    const source=select.value==='inherit'?undefined:sources.find(col=>String(col)===select.value)??null;
+    setAmpInput(amp,i,source);
+    ampChanged();
+   };
    field(ports,'IN '+(i+1),select);
   });
   card.append(fields,ports);return card;
@@ -731,6 +793,9 @@ function drawInstruments(){
    for(const song of data.songs){
     delete song.positions[id];
     if(song.namePositions)delete song.namePositions[id];
+    for(const overrides of Object.values(song.ampRouting??{})){
+     for(const [index,source] of Object.entries(overrides))if(source===id)overrides[index]=null;
+    }
     if(typeof id==='number')song.cells[id]='';
     else if(song.assignments)delete song.assignments[id];
    }
@@ -804,10 +869,14 @@ function readProject(text){
  const positions=obj=>record(obj)&&Object.entries(obj).every(([id,value])=>(ids.has(id)||customIds.has(id)||sourceCols.some(col=>String(col)===id))&&pair(value));
  const namePositions=obj=>obj===undefined||record(obj)&&Object.entries(obj).every(([id,value])=>instruments.some(instrument=>String(instrument.id)===id)&&(value===null||pair(value)));
  const assignments=obj=>obj===undefined||record(obj)&&Object.entries(obj).every(([id,value])=>customIds.has(id)&&typeof value==='string');
+ const portCounts=new Map(Array.isArray(project.amps)?project.amps.map(amp=>[amp?.id,amp?.inputs?.length]):[]);
+ const routing=obj=>obj===undefined||record(obj)&&Object.entries(obj).every(([id,overrides])=>
+  portCounts.has(id)&&record(overrides)&&Object.entries(overrides).every(([index,source])=>
+   /^(0|[1-9][0-9]*)$/.test(index)&&Number(index)<portCounts.get(id)&&(source===null||sources.includes(source))));
  if(!Array.isArray(project.amps)||!project.amps.every(validAmp)||
     !positions(project.base)||!namePositions(project.namePositions)||!Array.isArray(project.songs)||!project.songs.length||
     !project.songs.every(song=>record(song)&&Array.isArray(song.cells)&&song.cells.length===headers.length&&
-      song.cells.every(cell=>typeof cell==='string')&&positions(song.positions)&&namePositions(song.namePositions)&&assignments(song.assignments))||
+      song.cells.every(cell=>typeof cell==='string')&&positions(song.positions)&&namePositions(song.namePositions)&&assignments(song.assignments)&&routing(song.ampRouting))||
     !Number.isInteger(project.index)||project.index<0||project.index>=project.songs.length){
   throw Error('프로젝트 데이터가 손상됐거나 형식이 달라.');
  }
