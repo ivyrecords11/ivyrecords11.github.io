@@ -9,8 +9,12 @@
  button.textContent = '팀 프로젝트';
  document.querySelector('header .tools').append(button);
  const controls = [...dialog.querySelectorAll('button, input')];
+ const adminName = '이가연';
+ let community = {comments:[], activity:[]};
  const endpoint = new URL(config.api ?? '/api/team', location.href).href;
  const invite = new URLSearchParams(location.hash.slice(1)).get('team');
+ let adminToken = '';
+ try { adminToken = sessionStorage.getItem('stage-cue-admin-key') ?? ''; } catch {}
  let roomKey = '';
  try {
   roomKey = sessionStorage.getItem(endpoint) ?? '';
@@ -30,7 +34,10 @@
  function render() {
   $('teamJoin').hidden = !!workspace || !roomKey;
   $('teamIdentity').hidden = !workspace;
-  $('teamIdentity').textContent = workspace ? '편집자 · ' + editorName : '';
+  $('teamIdentity').textContent = workspace ? '편집자 · ' + editorName + (editorName === adminName ? (adminToken ? ' · 관리자' : ' · 관리자 인증 필요') : '') : '';
+  window.stageCueCanMoveAmp = () => editorName === adminName && !!adminToken;
+  $('commentForm').hidden = !workspace;
+  $('teamAdminUnlock').hidden = !workspace || editorName !== adminName || !!adminToken;
   $('teamSave').hidden = !workspace;
   $('teamReload').hidden = !workspace;
   $('teamLocal').hidden = !workspace;
@@ -49,7 +56,7 @@
   try {
    await action();
   } catch (error) {
-   if (error.status === 403) message('팀 초대 링크를 다시 열어 줘.');
+   if (error.status === 403) message(error.code === 'admin_required' ? '앰프 위치는 관리자만 바꿀 수 있어.' : error.code === 'admin_key' ? '관리자 확인 코드가 맞지 않아.' : '팀 초대 링크를 다시 열어 줘.');
    else if (error.status === 400 || error.status === 413) message('이름, 프로젝트 형식 또는 크기를 확인해 줘.');
    else message(errorMessage);
   } finally {
@@ -67,8 +74,9 @@
    body: body ? JSON.stringify(body) : undefined
   });
   if (response.status === 409) return null;
-  if (!response.ok) throw Object.assign(new Error('Team request failed'), {status: response.status});
-  return response.json();
+  const result = await response.json();
+  if (!response.ok) throw Object.assign(new Error('Team request failed'), {status: response.status, code: result.error});
+  return result;
  }
 
  function sharedProject(project) {
@@ -140,6 +148,7 @@
   }
   workspace = {draftKey, revision, conflict, baseline: saved && fingerprint(saved)};
   editor.open(project, persistDraft);
+  await loadCommunity();
   message(conflict ? '다른 팀원이 먼저 저장했어. 현재 초안은 남아 있어. 필요하면 JSON으로 내려받고 최신 버전을 열어 줘.' :
    rawDraft ? '이 브라우저에 남아 있던 팀 초안을 열었어.' :
    saved ? versionLabel(remote) + ' · 열었어.' : '팀 프로젝트가 비어 있어. 지금 배치를 시작본으로 저장할 수 있어.');
@@ -151,6 +160,57 @@
   else if (workspace) message(workspace.conflict ? '저장 충돌이 있어. 초안을 보관한 뒤 최신 버전을 불러와 줘.' : '팀 프로젝트 v' + workspace.revision + ' 편집 중');
   else message('팀에서 사용할 이름을 입력해 줘.');
  };
+ async function loadCommunity() {
+  if (!roomKey) return;
+  const response = await fetch(new URL('/api/community', endpoint), {headers:{'Authorization':'Bearer ' + roomKey}});
+  if (!response.ok) throw Object.assign(new Error('Community request failed'), {status:response.status});
+  community = await response.json();
+  $('communityMeta').textContent = '관리자 · ' + (community.admin || adminName) + (window.stageCueCanMoveAmp() ? ' · 앰프 위치 편집 가능' : ' · 앰프 위치는 관리자만 편집 가능');
+  const comments = $('commentList');
+  comments.replaceChildren();
+  if (!community.comments?.length) comments.innerHTML = '<li class="empty-community">아직 댓글이 없어.</li>';
+  for (const item of community.comments ?? []) {
+   const li = document.createElement('li'); li.className = 'community-item';
+   const head = document.createElement('header');
+   const author = document.createElement('strong'); author.textContent = item.author;
+   if (item.author === community.admin) { const badge = document.createElement('span'); badge.className='admin-badge'; badge.textContent='관리자'; author.append(badge); }
+   const date = document.createElement('small'); date.textContent = new Date(item.created_at).toLocaleString('ko-KR');
+   const body = document.createElement('p'); body.textContent = item.body;
+   head.append(author,date); li.append(head,body); comments.append(li);
+  }
+  const activity = $('activityList'); activity.replaceChildren();
+  if (!community.activity?.length) activity.innerHTML = '<li class="empty-community">아직 편집 기록이 없어.</li>';
+  for (const item of community.activity ?? []) {
+   const li = document.createElement('li'); li.className = 'community-item';
+   const head = document.createElement('header');
+   const author = document.createElement('strong'); author.textContent = item.editor + ' · v' + item.revision;
+   if (item.editor === community.admin) { const badge = document.createElement('span'); badge.className='admin-badge'; badge.textContent='관리자'; author.append(badge); }
+   const date = document.createElement('small'); date.textContent = new Date(item.created_at).toLocaleString('ko-KR');
+   const detail = document.createElement('p'); detail.textContent = item.details;
+   head.append(author,date); li.append(head,detail); activity.append(li);
+  }
+ }
+ $('commentsTab').onclick = () => { $('commentsTab').setAttribute('aria-pressed','true'); $('activityTab').setAttribute('aria-pressed','false'); $('commentsPane').hidden=false; $('activityList').hidden=true; };
+ $('activityTab').onclick = () => { $('commentsTab').setAttribute('aria-pressed','false'); $('activityTab').setAttribute('aria-pressed','true'); $('commentsPane').hidden=true; $('activityList').hidden=false; };
+ $('commentForm').onsubmit = event => {
+  event.preventDefault();
+  void run(async () => {
+   const body = $('commentBody').value.trim();
+   if (!body || !editorName) return;
+   const response = await fetch(new URL('/api/comments', endpoint), {method:'POST',headers:{'Authorization':'Bearer '+roomKey,'Content-Type':'application/json'},body:JSON.stringify({author:editorName,body})});
+   if (!response.ok) { const result=await response.json(); throw Object.assign(new Error('Comment request failed'), {status:response.status,code:result.error}); }
+   $('commentBody').value=''; await loadCommunity(); message('댓글을 남겼어.');
+  }, '댓글을 저장하지 못했어. 잠시 뒤 다시 시도해 줘.');
+ };
+ $('adminUnlock').onclick = () => void run(async () => {
+  const candidate = $('teamAdminKey').value;
+  const response = await fetch(new URL('/api/admin', endpoint), {method:'POST',headers:{'Authorization':'Bearer '+roomKey,'Content-Type':'application/json'},body:JSON.stringify({adminToken:candidate})});
+  if (!response.ok) throw Object.assign(new Error('Admin verification failed'), {status:response.status,code:'admin_key'});
+  adminToken = candidate;
+  try { sessionStorage.setItem('stage-cue-admin-key', adminToken); } catch {}
+  $('teamAdminKey').value='';
+  render(); editor.refreshStage(); await loadCommunity(); message('관리자 권한을 확인했어. 앰프 위치를 옮길 수 있어.');
+ }, '관리자 코드를 확인하지 못했어.');
  $('teamClose').onclick = () => dialog.close();
  dialog.oncancel = event => { if (busy) event.preventDefault(); };
 
@@ -171,7 +231,7 @@
    message('팀에 저장할 변경이 없어.');
    return;
   }
-  const result = await request({revision: target.revision, project, editor: editorName});
+  const result = await request({revision: target.revision, project, editor: editorName, adminToken: window.stageCueCanMoveAmp() ? adminToken : ''});
   if (workspace !== target) return;
   if (result === null) {
    target.conflict = true;
@@ -214,5 +274,6 @@
  };
  try { $('teamName').value = localStorage.getItem('stage-cue-editor:' + endpoint) ?? ''; } catch {}
  render();
+ setInterval(() => { if (workspace) loadCommunity().catch(() => {}); }, 30000);
  if (invite && roomKey) button.click();
 })();

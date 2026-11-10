@@ -81,7 +81,7 @@ h2{font-size:16px;margin-top:3px}
 .station.instrument.assigned{--role:var(--person)}
 .station.amp{--role:#c76124}
 .station.link-selected{outline:2px dashed #c76124;outline-offset:3px}
-.station.amp .amp-title{color:#a64a18}
+.station.amp .amp-title{color:#a64a18}.station.amp.readonly{cursor:default}.station.amp.readonly{cursor:default}
 .station.amp .bt{color:#315f9d}
 .station>svg{width:58px;height:58px;flex:none}
 .station svg .pencil-mark{stroke-width:.72;opacity:.55}
@@ -130,7 +130,7 @@ td:last-child input{width:48px}
 .amp-ports select{min-width:0;flex:1;padding:4px}
 .hide,[hidden]{display:none!important}
 @media(max-width:850px){.shell{grid-template-columns:1fr}.stage{height:420px}.sheet{max-height:440px}}
-@media(max-width:420px){.stage{margin:0 5px}.station{width:64px;min-height:78px;gap:2px;padding:2px}.station>svg{width:46px;height:46px}.station b{font-size:12px}.station small{font-size:10px}}
+@media(max-width:420px){.comment-form{grid-template-columns:1fr}.stage{margin:0 5px}.station{width:64px;min-height:78px;gap:2px;padding:2px}.station>svg{width:46px;height:46px}.station b{font-size:12px}.station small{font-size:10px}}
 /* Ink outlines for the layout. Notebook rules are drawn by the paper background. */
 :root{
  --sketch-frame:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M2 2 C14 1 21 3 31 2 S48 1 57 2 S66 2.6 70 2 C69 15 71 23 70 33 S69 48 70 58 S70.7 66 70 70 C60 69 52 71 43 70 S27 69 17 70 S6 70.7 2 70 C3 60 1 53 2 44 S3 28 2 18 S1.3 7 2 2Z' fill='none' stroke='%23786c4e' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E");
@@ -160,6 +160,18 @@ td,th{
 .team-dialog input{padding:6px 8px;font:inherit}
 .team-dialog .tools{flex-wrap:wrap}
 .team-dialog [role=status]{min-height:1.5em}
+.community{max-width:1800px;margin:0 auto 24px;padding:0 clamp(10px,2vw,28px)}
+.community>.sidetabs{margin:0 -1px}.community-body{padding:14px;min-height:150px}
+.community-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+.comment-form{display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:12px}
+.comment-form textarea{min-height:68px;resize:vertical;padding:8px;background:var(--panel);border:1px solid var(--pencil);font:inherit}
+.comment-list,.activity-list{display:grid;gap:8px;max-height:340px;overflow:auto;list-style:none;padding:0;margin:0}
+.community-item{padding:8px 10px;background:#fff6d6;border-left:2px solid var(--signal);overflow-wrap:anywhere}
+.community-item header{display:flex;justify-content:space-between;gap:8px;padding:0;background:none;border:0;font-size:12px}
+.community-item header small{white-space:nowrap}.community-item p{white-space:pre-wrap;margin-top:4px}
+.admin-badge{display:inline-block;margin-left:5px;padding:1px 5px;border:1px solid var(--signal);border-radius:8px;color:var(--signal);font-size:10px}
+.empty-community{color:var(--muted);padding:10px 0}
+@media(max-width:420px){.comment-form{grid-template-columns:1fr}}
 </style>
 <header><div class="header-title"><div class="brand"><span class="logo" aria-hidden="true">SC</span><div><strong>STAGE CUE</strong><small>무대 도면 · 큐 시트</small></div></div><label class="project-title">프로젝트 제목<input id="projectTitle" type="text" maxlength="100" placeholder="프로젝트 제목 입력"></label></div><div class="tools"><small id="save" role="status"></small><button id="undo" disabled title="Ctrl+Z">↶ 되돌리기</button><button id="importProject">불러오기</button><button id="exportProject">프로젝트 저장 ↓</button><input id="projectFile" type="file" accept=".json,application/json" hidden><button id="toggle" aria-expanded="true">편집 패널</button></div></header>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -172,8 +184,15 @@ td,th{
 </svg>
 <main class="shell" id="shell">
 <section class="panel"><div class="head"><div><div class="eyebrow" id="cue"></div><h1 id="song"></h1><small id="summary"></small></div><div class="tools"><select id="scope" aria-label="배치와 연결의 적용 범위"><option value="song">이 곡만</option><option value="base">전체 기본값</option></select><button id="resetSong" title="현재 곡의 위치와 연결을 전체 기본값으로 되돌려">이 곡을 기본값으로</button></div></div><div class="stage" id="stage" aria-label="무대 배치"></div><p class="note" id="note"></p><div class="transport"><div class="tools"><button id="prev" aria-label="이전 곡">←</button><button id="play" class="accent">▶ 재생</button><button id="next" aria-label="다음 곡">→</button><select id="speed" aria-label="곡당 재생 시간"><option value="1500">1.5초 / 곡</option><option value="3000" selected>3초 / 곡</option><option value="6000">6초 / 곡</option></select><small>곡 번호를 눌러 이동</small></div><nav class="rail" id="rail" aria-label="곡 타임라인"></nav></div></section>
-<aside class="panel" id="side"><div class="sidetabs" aria-label="편집 탭"><button id="setTab" aria-pressed="true">셋리스트</button><button id="instrumentTab" aria-pressed="false">악기</button><button id="ampTab" aria-pressed="false">앰프</button></div><div id="setEditor"><div class="head"><div><div class="eyebrow">01 / RUN OF SHOW</div><h2>큐 시트</h2></div><button id="add">＋ 곡 추가</button></div><div class="sheet" id="sheet"><table><thead id="columns"></thead><tbody id="rows"></tbody></table></div><div class="sheetfoot"><button id="up" aria-label="선택 곡 위로">↑</button><button id="down" aria-label="선택 곡 아래로">↓</button><button id="remove">선택 곡 삭제</button><button id="csv">CSV 내보내기</button></div><p class="sheethelp muted">셀을 직접 편집하거나 Excel에서 여러 셀을 복사해 붙여넣어. 번호를 누르면 해당 곡의 무대가 열려. 빈 파트는 무대에서 흐리게 표시돼.</p></div><section id="instrumentEditor" class="hide"><div class="head"><div><div class="eyebrow">03 / STAGE INSTRUMENTS</div><h2>무대 악기</h2></div><button id="addInstrument">＋ 악기 추가</button></div><p class="sheethelp muted">모든 곡에서 쓰는 악기와 보컬 포지션을 관리해. 곡별 담당자는 큐 시트에서 정해.</p><div class="amp-list" id="instruments"></div></section><section id="ampEditor" class="hide"><div class="head"><div><div class="eyebrow">02 / SIGNAL ROUTING</div><h2>앰프 패치</h2></div><button id="addAmp">＋ 앰프 추가</button></div><p class="sheethelp muted">위의 적용 범위에 따라 입력마다 연결을 골라. 곡별로 바꾸지 않은 입력은 전체 기본값을 따라가. 앰프 이름과 입력 수는 모든 곡에서 공통이야.</p><div class="amp-list" id="amps"></div></section></aside>
+<aside class="panel" id="side"><div class="sidetabs" aria-label="편집 탭"><button id="setTab" aria-pressed="true">셋리스트</button><button id="instrumentTab" aria-pressed="false">악기</button><button id="ampTab" aria-pressed="false">앰프</button></div><div id="setEditor"><div class="head"><div><div class="eyebrow">01 / RUN OF SHOW</div><h2>큐 시트</h2></div><button id="add">＋ 곡 추가</button></div><div class="sheet" id="sheet"><table><thead id="columns"></thead><tbody id="rows"></tbody></table></div><div class="sheetfoot"><button id="up" aria-label="선택 곡 위로">↑</button><button id="down" aria-label="선택 곡 아래로">↓</button><button id="remove">선택 곡 삭제</button><button id="csv">CSV 내보내기</button></div><p class="sheethelp muted">셀을 직접 편집하거나 Excel에서 여러 셀을 복사해 붙여넣어. 번호를 누르면 해당 곡의 무대가 열려. 빈 파트는 무대에서 흐리게 표시돼.</p></div><section id="instrumentEditor" class="hide"><div class="head"><div><div class="eyebrow">03 / STAGE INSTRUMENTS</div><h2>무대 악기</h2></div><button id="addInstrument">＋ 악기 추가</button></div><p class="sheethelp muted">모든 곡에서 쓰는 악기와 보컬 포지션을 관리해. 곡별 담당자는 큐 시트에서 정해.</p><div class="amp-list" id="instruments"></div></section><section id="ampEditor" class="hide"><div class="head"><div><div class="eyebrow">02 / SIGNAL ROUTING</div><h2>앰프 패치</h2></div><button id="addAmp">＋ 앰프 추가</button></div><p class="sheethelp muted">위의 적용 범위에 따라 입력마다 연결을 골라. 곡별로 바꾸지 않은 입력은 전체 기본값을 따라가. 앰프 이름과 입력 수는 모든 곡에서 공통이야. 앰프 위치는 관리자 이가연만 옮길 수 있어. 앰프 위치는 관리자 이가연만 옮길 수 있어.</p><div class="amp-list" id="amps"></div></section></aside>
 </main>
+ <section class="community panel" id="community" aria-label="팀 소통">
+  <nav class="sidetabs" aria-label="팀 소통 탭"><button id="commentsTab" aria-pressed="true">댓글</button><button id="activityTab" aria-pressed="false">편집 기록</button></nav>
+  <div class="community-body"><p class="community-meta" id="communityMeta">팀 프로젝트를 열면 댓글과 편집 기록을 볼 수 있어.</p>
+   <div id="commentsPane"><form class="comment-form" id="commentForm" hidden><textarea id="commentBody" maxlength="500" placeholder="팀원에게 남길 댓글" required></textarea><button class="accent" type="submit">댓글 남기기</button></form><ul class="comment-list" id="commentList"><li class="empty-community">아직 댓글이 없어.</li></ul></div>
+   <ol class="activity-list" id="activityList" hidden><li class="empty-community">아직 편집 기록이 없어.</li></ol>
+  </div>
+ </section>
 <footer class="font-credit">한글 서체 <a href="https://fonts.google.com/specimen/Nanum+Pen+Script">나눔손글씨 펜</a> · 대체 서체 <a href="https://www.busan.go.kr/bhbusan">부산광역시 부산단디손글씨</a> (공공누리 제1유형)</footer>
 <dialog id="teamDialog" class="team-dialog" aria-labelledby="teamTitle">
  <h2 id="teamTitle">팀 프로젝트</h2>
@@ -182,6 +201,7 @@ td,th{
   <div class="tools"><button type="submit">공유 프로젝트 열기</button></div>
  </form>
  <p id="teamIdentity" hidden></p>
+ <div id="teamAdminUnlock" hidden><label>관리자 확인 코드<input id="teamAdminKey" type="password" autocomplete="off"></label><button id="adminUnlock" type="button">관리자 권한 적용</button></div>
  <div class="tools">
   <button id="teamSave" hidden>팀에 저장</button>
   <button id="teamReload" hidden>최신 버전 불러오기</button>
@@ -348,7 +368,7 @@ function drawStage(){
   const assigned=amp?'':assignment(song,col);
   const instrument=!amp&&col!==4;
   const assignedName=performerName(assigned);
-  const card=make('button');card.dataset.station=String(col);card.className='station'+(amp?' amp':instrument?(assignedName?' instrument assigned':' instrument unassigned inactive'):'');
+  const card=make('button');card.dataset.station=String(col);card.className='station'+(amp?' amp'+(window.stageCueCanMoveAmp?.()?'':' readonly'):instrument?(assignedName?' instrument assigned':' instrument unassigned inactive'):'');
   card.style.setProperty('--role',amp?'#c76124':instrument?(assignedName?performerColor(assignedName):'#76600f'):color);
   if(instrument&&assignedName)colorPerformer(card,assigned);
   const label=make('span');
@@ -403,10 +423,10 @@ function drawStage(){
   };
   paint(position(col));
   let drag;
-  card.onpointerdown=e=>{if(e.button!==0)return;pause();drag={id:e.pointerId,x:e.clientX,y:e.clientY,start:position(col)};card.setPointerCapture(e.pointerId)};
+  card.onpointerdown=e=>{if(e.button!==0||(amp&&!window.stageCueCanMoveAmp?.()))return;pause();drag={id:e.pointerId,x:e.clientX,y:e.clientY,start:position(col)};card.setPointerCapture(e.pointerId)};
   card.onpointermove=e=>{if(drag?.id!==e.pointerId)return;const box=$('stage').getBoundingClientRect();if(Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>2||drag.moved){drag.moved=true;commit(drag.start[0]+(e.clientX-drag.x)/box.width*100,drag.start[1]+(e.clientY-drag.y)/box.height*100)}};
   card.onlostpointercapture=()=>{drag=null};
-  card.onkeydown=e=>{const move={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!move)return;e.preventDefault();pause();const [x,y]=position(col);const step=e.shiftKey?5:1;commit(x+move[0]*step,y+move[1]*step)};
+  card.onkeydown=e=>{if(amp&&!window.stageCueCanMoveAmp?.())return;const move={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key];if(!move)return;e.preventDefault();pause();const [x,y]=position(col);const step=e.shiftKey?5:1;commit(x+move[0]*step,y+move[1]*step)};
   return card;
  }));
  for(const {slip,card,col} of slips){
