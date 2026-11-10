@@ -72,7 +72,7 @@ h2{font-size:16px;margin-top:3px}
 }
 .stage-name{position:absolute;z-index:2;transform:translate(-50%,-50%);touch-action:none;cursor:grab}
 .stage-name:hover{background:#fff}
-.waiting-names{position:absolute;z-index:3;top:24px;bottom:24px;left:calc(6% + 4px);display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;pointer-events:none}
+.waiting-names{position:absolute;z-index:3;top:24px;bottom:24px;right:calc(94% + 4px);display:flex;flex-direction:column;align-items:flex-end;justify-content:center;gap:4px;pointer-events:none}
 .waiting-names .name-slip{opacity:1}
 .station:active{cursor:grabbing;z-index:5}
 .station.inactive{opacity:.62}
@@ -547,7 +547,7 @@ function animateMoves(previous,waiting){
  const differentPart=({from,to})=>Number(from.column!==to.column);
  matches.sort((a,b)=>differentPart(a)-differentPart(b)||a.distance-b.distance);
  const usedOrigins=new Set(),usedDestinations=new Set();
- const timing={duration:580,easing:'ease-in-out'};
+ const timing={duration:1000,easing:'ease-in-out'};
  for(const {from,to,distance} of matches){
   if(usedOrigins.has(from)||usedDestinations.has(to))continue;
   usedOrigins.add(from);
@@ -682,7 +682,15 @@ function drawWires(){
    const port=(i+1)/(amp.inputs.length+1);
    const [x1,y1]=horizontal?point(from,dx>0?1:0,.5):point(from,.5,dy>0?1:0);
    const [x2,y2]=horizontal?point(target,dx>0?0:1,port):point(target,port,dy>0?0:1);
-   const path=svg('line',{x1,y1,x2,y2,stroke:'var(--wire)','stroke-width':1.7,'marker-end':'url(#amp-arrow)'});
+   const length=Math.hypot(x2-x1,y2-y1),segments=Math.max(4,Math.min(12,Math.ceil(length/34)));
+   const bend=Math.min(13,Math.max(4,length*.025)),normal=[-(y2-y1)/length,(x2-x1)/length];
+   let d='M '+x1+' '+y1;
+   for(let step=1;step<=segments;step++){
+    const t=step/segments,mid=t-.5/segments,wobble=Math.sin(step*2.3+i*1.7)*bend;
+    const cx=x1+(x2-x1)*mid+normal[0]*wobble,cy=y1+(y2-y1)*mid+normal[1]*wobble;
+    d+=' Q '+cx+' '+cy+' '+(x1+(x2-x1)*t)+' '+(y1+(y2-y1)*t);
+   }
+   const path=svg('path',{d,fill:'none',stroke:'var(--wire)','stroke-width':1.7,'stroke-linecap':'round','stroke-linejoin':'round','marker-end':'url(#amp-arrow)'});
    if(!assignment(current(),source).trim()){path.setAttribute('stroke-dasharray','4 5');path.setAttribute('opacity','.48')}
    layer.append(path);
   });
