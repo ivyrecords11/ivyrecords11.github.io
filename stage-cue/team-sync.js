@@ -275,5 +275,9 @@
  try { $('teamName').value = localStorage.getItem('stage-cue-editor:' + endpoint) ?? ''; } catch {}
  render();
  setInterval(() => { if (workspace) loadCommunity().catch(() => {}); }, 30000);
- if (invite && roomKey) button.click();
+ if (invite && roomKey) {
+  const guide = $('guideDialog');
+  if (guide?.open) guide.addEventListener('close', () => button.click(), {once:true});
+  else button.click();
+ }
 })();
