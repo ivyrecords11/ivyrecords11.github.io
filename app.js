@@ -1,4 +1,5 @@
 const projects = [
+  {name:'Stage Cue',repo:null,category:'tools',language:'JavaScript',description:'밴드 무대 배치와 곡별 큐를 함께 편집하는 팀 리허설 도구.',live:'https://ivyrecords11.github.io/stage-cue/'},
   {name:'Kaisei Visualizer',repo:'kaisei-visualizer',category:'sound',language:'TypeScript',description:'USTX 악보와 오디오로 합창 파트와 피치가 보이는 영상을 만드는 웹 도구.',live:'https://ivyrecords11.github.io/kaisei-visualizer/'},
   {name:'2D Todo Tierlist',repo:'2d-todo-tierlist',category:'tools',language:'JavaScript',description:'중요도와 긴급도, 두 축 위에 할 일과 목표를 배치하는 보드.',live:'https://ivyrecords11.github.io/2d-todo-tierlist/'},
   {name:'OpenUtau LEAP',repo:'openutau-LEAP',category:'sound',language:'C#',description:'한글·일본어·영어 가사를 연결하는 OpenUtau 다국어 포네마이저.'},
@@ -14,7 +15,7 @@ const grid=document.querySelector('#grid'), search=document.querySelector('#sear
 function render(){
   const query=search.value.trim().toLocaleLowerCase();
   const visible=projects.filter(project=>(activeFilter==='all'||project.category===activeFilter)&&`${project.name} ${project.description} ${project.language}`.toLocaleLowerCase().includes(query));
-  grid.innerHTML=visible.map(project=>`<article class="project"><h3>${escapeHtml(project.name)}</h3><p>${escapeHtml(project.description)}</p><p class="meta">${escapeHtml(project.language)}</p><p class="project-links">${project.live?`<a href="${escapeHtml(project.live)}" target="_blank" rel="noopener noreferrer">사이트 열기</a><span aria-hidden="true"> · </span>`:''}<a href="https://github.com/ivyrecords11/${encodeURIComponent(project.repo)}" target="_blank" rel="noopener noreferrer">GitHub 저장소</a></p></article>`).join('');
+  grid.innerHTML=visible.map(project=>`<article class="project"><h3>${escapeHtml(project.name)}</h3><p>${escapeHtml(project.description)}</p><p class="meta">${escapeHtml(project.language)}</p><p class="project-links">${project.live?`<a href="${escapeHtml(project.live)}" target="_blank" rel="noopener noreferrer">사이트 열기</a>`:''}${project.live&&project.repo?`<span aria-hidden="true"> · </span>`:''}${project.repo?`<a href="https://github.com/ivyrecords11/${encodeURIComponent(project.repo)}" target="_blank" rel="noopener noreferrer">GitHub 저장소</a>`:''}</p></article>`).join('');
   document.querySelector('#result').textContent=`${visible.length}개 프로젝트`;
   document.querySelector('#empty').hidden=visible.length>0;
 }
